@@ -1,0 +1,2078 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Caixa X1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap">
+
+  <style>
+  /* ── Tokens ───────────────────────────────────────────────────────────
+     Vidro sobre fundo profundo. Tema único e deliberado: cada cor é
+     pintada explicitamente, então a página se sustenta sobre qualquer
+     fundo do visualizador. */
+  :root{
+    color-scheme: dark;
+
+    --ground:#0B0817;
+    /* Aproximação sólida do vidro composto. Usada só onde o SVG precisa
+       de uma cor opaca: anéis de marcador e vãos entre marcas. */
+    --surface:#1B1828;
+    --raised:#221E2E;
+
+    --ink:#F2EFF9;
+    --ink-2:#B4ACC9;
+    --ink-3:#9C94B0;
+
+    /* Séries validadas contra a superfície de vidro (ΔE deutan 9.5) */
+    --ads:#D9633F;
+    --rev:#14A583;
+    --net:#8B72F0;
+    --ads-lit:#EE8A66;
+    --rev-lit:#3FD1A8;
+    --net-lit:#A995FF;
+    --warn:#D79A25;
+    --warn-lit:#EFB443;
+
+    --grid:rgba(255,255,255,.07);
+    --hair:rgba(255,255,255,.075);
+    --edge:rgba(255,255,255,.085);
+    --edge-lit:rgba(255,255,255,.14);
+
+    --glass-1:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.022));
+    --glass-2:linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.032));
+    --glass-3:rgba(255,255,255,.05);
+    --blur:blur(30px) saturate(150%);
+
+    --lift:
+      inset 0 1px 0 rgba(255,255,255,.13),
+      0 24px 60px -30px rgba(0,0,0,.8),
+      0 2px 8px -4px rgba(0,0,0,.4);
+    --lift-sm:
+      inset 0 1px 0 rgba(255,255,255,.1),
+      0 12px 30px -18px rgba(0,0,0,.7);
+
+    --sans:"Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif:"Instrument Serif", ui-serif, Georgia, "Times New Roman", serif;
+
+    --ease:cubic-bezier(.16,1,.3,1);
+    --r-pill:999px;
+    --r-ctl:13px;
+    --r-card:18px;
+    --r-panel:22px;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:.9375rem;
+    line-height:1.6;
+    letter-spacing:-0.006em;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  h1,h2,h3{margin:0;font-weight:400;}
+  p{margin:0;}
+  button{font:inherit;color:inherit;}
+
+  :where(a,button,input,[tabindex]):focus-visible{
+    outline:2px solid var(--net-lit);
+    outline-offset:2px;
+    border-radius:8px;
+  }
+
+  /* Título editorial em serifada; números nunca. */
+  .title{
+    font-family:var(--serif);
+    font-weight:400;
+    letter-spacing:-0.012em;
+    line-height:1.18;
+    text-wrap:balance;
+  }
+  .title em{font-style:italic;color:var(--ink-2);}
+
+  /* Sobrelinha discreta: caixa normal, sem versalete gritado. */
+  .overline{
+    font-size:.75rem;
+    font-weight:500;
+    letter-spacing:.005em;
+    color:var(--ink-3);
+  }
+
+  /* ── Fundo: orbes lentos para o vidro ter o que refratar ──────────── */
+  .field{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .field__glow{position:absolute;border-radius:50%;filter:blur(100px);}
+  .field__glow--a{width:74vw;height:74vw;background:radial-gradient(circle,#6B4BE8 0%,rgba(107,75,232,0) 66%);opacity:.4;top:-30vw;left:-16vw;animation:drift-a 52s ease-in-out infinite;}
+  .field__glow--b{width:66vw;height:66vw;background:radial-gradient(circle,#0F7F68 0%,rgba(15,127,104,0) 66%);opacity:.34;bottom:-30vw;right:-14vw;animation:drift-b 64s ease-in-out infinite;}
+  .field__glow--c{width:52vw;height:52vw;background:radial-gradient(circle,#7A2E63 0%,rgba(122,46,99,0) 68%);opacity:.26;top:32%;right:-20vw;animation:drift-c 78s ease-in-out infinite;}
+  @keyframes drift-a{0%,100%{transform:translate3d(0,0,0) scale(1);}50%{transform:translate3d(7vw,5vw,0) scale(1.14);}}
+  @keyframes drift-b{0%,100%{transform:translate3d(0,0,0) scale(1.1);}50%{transform:translate3d(-8vw,-4vw,0) scale(1);}}
+  @keyframes drift-c{0%,100%{transform:translate3d(0,0,0) scale(1);}50%{transform:translate3d(-5vw,8vw,0) scale(1.2);}}
+
+  /* ── Casca ─────────────────────────────────────────────────────────── */
+  .shell{
+    position:relative;z-index:1;
+    max-width:1180px;margin:0 auto;
+    padding:0 22px 110px;
+    display:flex;flex-direction:column;gap:26px;
+  }
+
+  /* ── Cabeçalho ─────────────────────────────────────────────────────── */
+  .deck{
+    position:sticky;top:0;z-index:30;
+    margin:0 -22px;padding:16px 22px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;
+    background:linear-gradient(180deg, rgba(11,8,23,.82), rgba(11,8,23,.62));
+    backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    border-bottom:1px solid var(--hair);
+  }
+  .deck__id{display:flex;align-items:center;gap:13px;margin-right:auto;min-width:0;}
+  .deck__mark{
+    width:40px;height:40px;flex:none;display:grid;place-items:center;
+    border-radius:12px;color:var(--net-lit);
+    background:var(--glass-2);border:1px solid var(--edge);
+    box-shadow:var(--lift-sm);
+  }
+  .deck__mark svg{display:block;}
+  .deck h1{font-family:var(--serif);font-size:1.375rem;line-height:1.1;letter-spacing:-.015em;}
+  .deck__sub{font-size:.8125rem;color:var(--ink-3);}
+
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:7px 14px;border-radius:var(--r-pill);
+    background:var(--glass-3);border:1px solid var(--edge);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    font-size:.8125rem;color:var(--ink-2);white-space:nowrap;
+  }
+  .chip__dot{width:7px;height:7px;border-radius:50%;background:var(--ink-3);flex:none;}
+  .chip--live .chip__dot{background:var(--rev-lit);box-shadow:0 0 0 3px rgba(63,209,168,.16);}
+  .chip--local .chip__dot{background:var(--warn-lit);box-shadow:0 0 0 3px rgba(239,180,67,.16);}
+
+  /* ── Controles ─────────────────────────────────────────────────────── */
+  .filterbar{
+    display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;
+    padding:15px 18px;border-radius:var(--r-panel);
+    background:var(--glass-1);border:1px solid var(--edge);
+    backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    box-shadow:var(--lift-sm);
+  }
+  .filterbar__span{margin-left:auto;font-size:.8125rem;color:var(--ink-3);}
+  .weeknav{display:inline-flex;gap:6px;}
+  .weeknav button{
+    width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
+    border-radius:var(--r-pill);border:1px solid var(--edge);background:var(--glass-2);
+    color:var(--ink);cursor:pointer;font-size:1.0625rem;line-height:1;padding:0;
+    transition:background .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease);
+  }
+  .weeknav button:hover{background:rgba(255,255,255,.09);border-color:var(--edge-lit);transform:translateY(-1px);}
+  .weeknav button:disabled{opacity:.35;cursor:default;transform:none;}
+
+  .segbar{
+    display:flex;flex-wrap:wrap;gap:3px;padding:4px;border-radius:var(--r-pill);
+    background:rgba(0,0,0,.24);border:1px solid var(--hair);
+    max-width:100%;
+  }
+  @media (max-width:480px){
+    #range-seg{border-radius:var(--r-ctl);}
+    #range-seg button{padding:7px 12px;}
+  }
+  .segbar button{
+    padding:7px 16px;border:1px solid transparent;border-radius:var(--r-pill);
+    background:transparent;font-size:.875rem;font-weight:500;color:var(--ink-3);
+    cursor:pointer;transition:color .3s var(--ease), background .3s var(--ease), border-color .3s var(--ease);
+  }
+  .segbar button:hover{color:var(--ink);background:rgba(255,255,255,.05);}
+  .segbar button[aria-pressed="true"]{
+    color:var(--ink);background:var(--glass-2);border-color:var(--edge-lit);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 4px 12px -6px rgba(0,0,0,.6);
+  }
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 20px;border-radius:var(--r-ctl);cursor:pointer;
+    font-size:.875rem;font-weight:500;letter-spacing:-.005em;white-space:nowrap;
+    border:1px solid var(--edge);background:var(--glass-2);color:var(--ink);
+    box-shadow:var(--lift-sm);
+    transition:transform .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .btn:hover{transform:translateY(-1px);border-color:var(--edge-lit);background:rgba(255,255,255,.09);}
+  .btn:active{transform:translateY(0);}
+  .btn--primary{
+    background:linear-gradient(180deg, #9A83FF, #7B60EC);
+    border-color:rgba(255,255,255,.22);color:#0C0718;font-weight:600;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.34), 0 12px 28px -12px rgba(139,114,240,.6);
+  }
+  .btn--primary:hover{background:linear-gradient(180deg, #A995FF, #8B72F0);}
+  .btn--ghost{background:transparent;box-shadow:none;}
+  .btn--ghost:hover{background:rgba(255,255,255,.06);}
+  .btn--danger:hover{border-color:rgba(238,138,102,.5);color:var(--ads-lit);background:rgba(217,99,63,.12);}
+
+  /* ── Painéis de vidro ──────────────────────────────────────────────── */
+  .panel{
+    border-radius:var(--r-panel);padding:28px;
+    background:var(--glass-1);border:1px solid var(--edge);
+    backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    box-shadow:var(--lift);
+  }
+  .panel__head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;}
+  .panel__head .segbar{margin-left:auto;}
+  .panel h2.title{margin-top:10px;font-size:1.5rem;}
+
+  /* ── Herói ─────────────────────────────────────────────────────────── */
+  .hero__grid{
+    display:grid;gap:30px 44px;margin-top:18px;
+    grid-template-columns:minmax(250px,1.1fr) minmax(230px,.9fr);
+  }
+  @media (max-width:780px){.hero__grid{grid-template-columns:1fr;gap:26px;}}
+  .hero__figure{
+    font-family:var(--sans);font-weight:600;
+    font-size:clamp(3rem, 7vw, 4.75rem);
+    line-height:1.02;letter-spacing:-.042em;
+    font-variant-numeric:proportional-nums;
+  }
+  .hero__figure--down{color:var(--ads-lit);}
+  .hero__note{margin-top:14px;color:var(--ink-2);max-width:44ch;}
+  .hero__side{display:flex;flex-direction:column;gap:18px;justify-content:center;}
+  .hero__roi{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;}
+  .hero__roi b{font-weight:600;font-size:2rem;letter-spacing:-.028em;}
+  .hero__roi span{font-size:.8125rem;color:var(--ink-3);}
+
+  .verdict{
+    align-self:flex-start;display:inline-flex;align-items:center;gap:9px;
+    padding:8px 16px;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  }
+  .verdict--good{background:rgba(20,165,131,.15);border:1px solid rgba(63,209,168,.34);color:var(--rev-lit);}
+  .verdict--warn{background:rgba(215,154,37,.15);border:1px solid rgba(239,180,67,.34);color:var(--warn-lit);}
+  .verdict--bad{background:rgba(217,99,63,.15);border:1px solid rgba(238,138,102,.34);color:var(--ads-lit);}
+  .verdict--idle{background:var(--glass-3);border:1px solid var(--edge);color:var(--ink-2);}
+
+  .split{display:flex;gap:14px 26px;flex-wrap:wrap;margin:0;}
+  .split > div{min-width:106px;}
+  .split dt{font-size:.75rem;color:var(--ink-3);}
+  .split dd{margin:4px 0 0;font-weight:600;font-size:1.125rem;letter-spacing:-.015em;}
+
+  /* ── Cartões de indicador ──────────────────────────────────────────── */
+  .kpis{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(198px,1fr));}
+  @media (max-width:660px){
+    .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .tile{padding:15px 15px 12px;}
+    .tile__value{font-size:1.4375rem;}
+    .tile__foot .spark{width:56px;}
+  }
+  .tile{
+    position:relative;overflow:hidden;padding:19px 20px 16px;
+    border-radius:var(--r-card);
+    background:var(--glass-1);border:1px solid var(--edge);
+    backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    box-shadow:var(--lift-sm);
+    transition:transform .38s var(--ease), border-color .38s var(--ease), box-shadow .38s var(--ease);
+  }
+  .tile:hover{transform:translateY(-3px);border-color:var(--edge-lit);box-shadow:var(--lift);}
+  .tile__label{display:flex;align-items:center;gap:8px;font-size:.8125rem;color:var(--ink-3);}
+  .swatch{width:8px;height:8px;border-radius:50%;background:var(--tile-hue,var(--net));flex:none;}
+  .tile__value{
+    margin-top:10px;font-weight:600;font-size:1.75rem;letter-spacing:-.03em;
+    font-variant-numeric:proportional-nums;
+  }
+  .tile__foot{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:8px;}
+  .delta{flex:1 1 auto;min-width:0;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .delta--up{color:var(--rev-lit);}
+  .delta--down{color:var(--ads-lit);}
+  .delta--flat{color:var(--ink-3);}
+  .spark{display:block;flex:none;}
+
+  /* ── Projeção ──────────────────────────────────────────────────────── */
+  .proj__grid{
+    display:grid;gap:14px;margin:22px 0 0;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  }
+  @media (max-width:660px){
+    .proj__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .proj__cell{padding:13px 14px;}
+    .proj__cell dd{font-size:1.1875rem;}
+  }
+  .proj__cell{
+    padding:16px 18px;border-radius:var(--r-card);
+    background:rgba(255,255,255,.035);border:1px solid var(--hair);
+  }
+  .proj__cell dt{font-size:.75rem;color:var(--ink-3);}
+  .proj__cell dd{margin:7px 0 0;font-weight:600;font-size:1.375rem;letter-spacing:-.028em;}
+  .proj__cell small{display:block;margin-top:5px;font-size:.75rem;color:var(--ink-3);font-weight:400;letter-spacing:0;}
+  .proj__pace{
+    margin-top:16px;padding:15px 18px;border-radius:var(--r-card);
+    background:rgba(0,0,0,.2);border:1px solid var(--hair);
+    color:var(--ink-2);font-size:.875rem;
+  }
+  .proj__pace b{color:var(--ink);font-weight:600;}
+
+  .meter{margin-top:24px;padding-top:22px;border-top:1px solid var(--hair);}
+  .meter__top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;}
+  .meter__track{
+    position:relative;height:10px;margin-top:14px;border-radius:var(--r-pill);overflow:hidden;
+    background:color-mix(in srgb, var(--meter-hue,var(--net)) 20%, rgba(0,0,0,.32));
+  }
+  .meter__fill{
+    position:absolute;inset:0 auto 0 0;border-radius:var(--r-pill);width:0;
+    background:linear-gradient(90deg, color-mix(in srgb, var(--meter-hue,var(--net)) 78%, #fff 8%), var(--meter-hue,var(--net)));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.28);
+    transition:width 1s var(--ease);
+  }
+  .meter__scale{display:flex;justify-content:space-between;margin-top:9px;font-size:.75rem;color:var(--ink-3);}
+  .metainput{display:inline-flex;align-items:center;gap:10px;font-size:.875rem;color:var(--ink-2);flex-wrap:wrap;}
+
+  /* ── Campos ────────────────────────────────────────────────────────── */
+  .field-wrap{display:flex;flex-direction:column;gap:7px;min-width:0;}
+  .field-wrap label{font-size:.75rem;color:var(--ink-3);}
+  .inputbox{position:relative;display:flex;align-items:center;}
+  .inputbox__prefix{
+    position:absolute;left:14px;font-size:.875rem;color:var(--ink-3);pointer-events:none;
+  }
+  .field-wrap input, .metainput input{
+    width:100%;padding:12px 14px;
+    border:1px solid var(--edge);border-radius:var(--r-ctl);
+    background:rgba(0,0,0,.24);color:var(--ink);
+    font-family:var(--sans);font-size:.9375rem;
+    transition:border-color .3s var(--ease), background .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .metainput input{width:150px;padding-left:43px;}
+  .inputbox--money input{padding-left:43px;}
+  .field-wrap input:hover, .metainput input:hover{border-color:var(--edge-lit);}
+  .field-wrap input:focus, .metainput input:focus{
+    outline:none;border-color:var(--net);background:rgba(0,0,0,.34);
+    box-shadow:0 0 0 4px rgba(139,114,240,.16);
+  }
+  .field-wrap input::placeholder{color:#6D6485;}
+  .datechips{display:flex;gap:6px;margin-top:2px;}
+  .datechips button{
+    padding:3px 10px;border-radius:var(--r-pill);cursor:pointer;
+    border:1px solid var(--hair);background:transparent;
+    font-size:.75rem;color:var(--ink-3);
+    transition:color .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease);
+  }
+  .datechips button:hover{color:var(--ink);border-color:var(--edge-lit);background:rgba(255,255,255,.06);}
+
+  /* ── Gráficos ──────────────────────────────────────────────────────── */
+  .charts{display:grid;gap:20px;}
+  .chart__head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;}
+  .chart h3.title{font-size:1.25rem;}
+  .chart__hint{font-size:.8125rem;color:var(--ink-3);}
+  .tolink{
+    margin-left:auto;background:none;border:0;padding:4px 0;cursor:pointer;
+    font-size:.8125rem;color:var(--ink-3);
+    border-bottom:1px solid var(--edge);
+    transition:color .3s var(--ease), border-color .3s var(--ease);
+  }
+  .tolink:hover{color:var(--net-lit);border-color:var(--net-lit);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:16px;}
+  .legend__item{display:inline-flex;align-items:center;gap:9px;font-size:.8125rem;color:var(--ink-2);}
+  .legend__key{width:15px;height:3px;border-radius:2px;background:var(--k);flex:none;}
+  .legend__key--sq{width:9px;height:9px;border-radius:50%;}
+  .legend__key--dash{background:repeating-linear-gradient(90deg,var(--k) 0 4px, transparent 4px 8px);}
+
+  .plot{position:relative;margin-top:16px;}
+  .plot svg{display:block;width:100%;height:auto;overflow:visible;}
+  .axis-text{font-family:var(--sans);font-size:11px;fill:var(--ink-3);}
+  .axis-text--val{font-variant-numeric:tabular-nums;}
+  .label-text{font-family:var(--sans);font-size:11.5px;font-weight:500;fill:var(--ink-2);font-variant-numeric:tabular-nums;}
+  .gridline{stroke:var(--grid);stroke-width:1;}
+  .zeroline{stroke:rgba(255,255,255,.2);stroke-width:1;}
+  .band{fill:transparent;cursor:crosshair;}
+  .band.is-on{fill:rgba(255,255,255,.045);}
+
+  .tip{
+    position:absolute;z-index:6;min-width:168px;pointer-events:none;
+    padding:13px 15px;border-radius:14px;
+    background:rgba(28,24,42,.82);border:1px solid var(--edge-lit);
+    backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+    box-shadow:0 20px 44px -16px rgba(0,0,0,.85);
+    opacity:0;transform:translate(-50%,-108%);
+    transition:opacity .18s var(--ease);
+  }
+  .tip[data-on="1"]{opacity:1;}
+  .tip__date{font-size:.75rem;color:var(--ink-3);}
+  .tip__row{display:flex;align-items:center;gap:9px;margin-top:8px;font-size:.875rem;color:var(--ink-2);}
+  .tip__row b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);}
+
+  .empty-plot{
+    display:grid;place-items:center;height:190px;margin-top:16px;
+    border:1px dashed var(--edge);border-radius:var(--r-card);
+    color:var(--ink-3);font-size:.875rem;
+  }
+
+  /* ── Economia unitária ─────────────────────────────────────────────── */
+  .econ{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr));margin:0;}
+  @media (max-width:860px){.econ{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media (max-width:520px){.econ{grid-template-columns:1fr;}}
+  .econ__cell{
+    padding:20px;border-radius:var(--r-card);
+    background:var(--glass-1);border:1px solid var(--edge);
+    backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    box-shadow:var(--lift-sm);
+  }
+  .econ__cell dt{font-size:.75rem;color:var(--ink-3);}
+  .econ__cell dd{margin:9px 0 0;font-weight:600;font-size:1.3125rem;letter-spacing:-.028em;}
+  .econ__cell small{display:block;margin-top:6px;font-size:.75rem;color:var(--ink-3);font-weight:400;letter-spacing:0;}
+
+  /* ── Livro-caixa ───────────────────────────────────────────────────── */
+  .form{
+    display:grid;gap:16px;margin-top:22px;
+    grid-template-columns:repeat(auto-fit,minmax(146px,1fr));
+    align-items:start;
+  }
+  .field-wrap--wide{grid-column:span 2;}
+  @media (max-width:600px){.field-wrap--wide{grid-column:span 1;}}
+  .form__actions{
+    grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;
+    margin-top:4px;padding-top:18px;border-top:1px solid var(--hair);
+  }
+  @media (max-width:600px){.form__actions{justify-content:stretch;}.form__actions .btn{flex:1 1 auto;}}
+
+  .tablewrap{
+    margin-top:24px;overflow-x:auto;border-radius:var(--r-card);
+    border:1px solid var(--edge);background:rgba(0,0,0,.16);
+  }
+  table{border-collapse:collapse;width:100%;min-width:760px;}
+  caption{
+    text-align:left;padding:15px 20px;border-bottom:1px solid var(--hair);
+    font-size:.8125rem;color:var(--ink-3);
+  }
+  th,td{padding:13px 20px;text-align:right;border-bottom:1px solid var(--hair);font-size:.875rem;}
+  th{font-weight:500;font-size:.75rem;color:var(--ink-3);}
+  th:first-child,td:first-child{text-align:left;}
+  th:last-child,td:last-child{text-align:right;}
+  tbody td{color:var(--ink-2);font-variant-numeric:tabular-nums;}
+  tbody td:first-child{color:var(--ink);font-variant-numeric:normal;}
+  tbody tr{transition:background .25s var(--ease);}
+  tbody tr:hover{background:rgba(255,255,255,.035);}
+  tbody tr:last-child td{border-bottom:0;}
+  .num--pos{color:var(--rev-lit);}
+  .num--neg{color:var(--ads-lit);}
+  .rowbtn{
+    border:1px solid transparent;background:none;padding:5px 10px;border-radius:9px;
+    font-size:.8125rem;color:var(--ink-3);cursor:pointer;
+    transition:color .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease);
+  }
+  .rowbtn:hover{color:var(--net-lit);border-color:var(--edge);background:rgba(255,255,255,.05);}
+  .rowbtn--del:hover{color:var(--ads-lit);}
+  .demotag{
+    display:inline-block;margin-left:9px;padding:2px 8px;border-radius:var(--r-pill);
+    background:rgba(255,255,255,.06);border:1px solid var(--hair);
+    font-size:.6875rem;color:var(--ink-3);
+  }
+  .rownote{display:block;margin-top:2px;font-size:.75rem;color:var(--ink-3);}
+
+  .empty{
+    display:flex;flex-direction:column;align-items:flex-start;gap:18px;
+    margin-top:22px;padding:34px;
+    border:1px dashed var(--edge);border-radius:var(--r-card);
+    background:rgba(0,0,0,.16);
+  }
+  .empty p{color:var(--ink-2);max-width:54ch;}
+  .empty__actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+  .foot{
+    display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;
+    margin-top:22px;padding-top:20px;border-top:1px solid var(--hair);
+    font-size:.8125rem;color:var(--ink-3);
+  }
+  .foot__actions{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;}
+
+  /* ── Avisos ────────────────────────────────────────────────────────── */
+  .toasts{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;}
+  .toast{
+    padding:13px 20px;border-radius:var(--r-pill);
+    background:rgba(28,24,42,.88);border:1px solid var(--edge-lit);
+    backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+    box-shadow:0 20px 44px -16px rgba(0,0,0,.85);
+    font-size:.875rem;color:var(--ink);
+    animation:toast-in .42s var(--ease) both;
+    max-width:min(90vw,470px);text-align:center;
+  }
+  .toast--bad{border-color:rgba(238,138,102,.46);color:var(--ads-lit);}
+  .toast--good{border-color:rgba(63,209,168,.42);color:var(--rev-lit);}
+  @keyframes toast-in{from{opacity:0;transform:translateY(16px) scale(.96);}to{opacity:1;transform:none;}}
+
+  .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+  /* ── Entrada em cena ───────────────────────────────────────────────── */
+  .rise{animation:rise .78s var(--ease) both;animation-delay:var(--d,0ms);}
+  @keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+  .draw-bar{animation:grow-bar .82s var(--ease) both;animation-delay:var(--d,0ms);transform-box:fill-box;transform-origin:var(--o,bottom);}
+  @keyframes grow-bar{from{transform:scaleY(.02);}to{transform:none;}}
+  .draw-line{animation:draw 1.1s var(--ease) .1s both;}
+  @keyframes draw{from{stroke-dashoffset:var(--len);}to{stroke-dashoffset:0;}}
+  .fade-in{animation:fade .8s ease .55s both;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-delay:0ms !important;transition-duration:.001ms !important;}
+    .field__glow{animation:none;}
+  }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+
+<div class="field" aria-hidden="true">
+  <div class="field__glow field__glow--a"></div>
+  <div class="field__glow field__glow--b"></div>
+  <div class="field__glow field__glow--c"></div>
+</div>
+
+<main class="shell">
+  <header class="deck">
+    <div class="deck__id">
+      <span class="deck__mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 14.5 6.6 9l3.3 3.1L17.5 4"/>
+          <path d="M13.4 4h4.1v4.1"/>
+          <path d="M2 17.6h16"/>
+        </svg>
+      </span>
+      <div>
+        <h1>Caixa X1</h1>
+        <p class="deck__sub">Operação de vendas no Facebook</p>
+      </div>
+    </div>
+    <span class="chip" id="src-chip"><span class="chip__dot"></span><span id="src-label">Conectando</span></span>
+    <button type="button" class="btn btn--primary" id="quick-add">Lançar hoje</button>
+  </header>
+
+  <div class="filterbar rise" style="--d:60ms">
+    <span class="overline">Período</span>
+    <div class="segbar" role="group" aria-label="Período analisado" id="range-seg">
+      <button type="button" data-range="7" aria-pressed="false">7 dias</button>
+      <button type="button" data-range="14" aria-pressed="false">14 dias</button>
+      <button type="button" data-range="30" aria-pressed="true">30 dias</button>
+      <button type="button" data-range="week" aria-pressed="false">Semana</button>
+      <button type="button" data-range="all" aria-pressed="false">Tudo</button>
+    </div>
+    <span class="weeknav" id="week-nav" hidden>
+      <button type="button" id="week-prev" aria-label="Semana anterior">‹</button>
+      <button type="button" id="week-next" aria-label="Próxima semana">›</button>
+    </span>
+    <span class="filterbar__span" id="range-span">—</span>
+  </div>
+
+  <section class="panel rise" style="--d:130ms" aria-labelledby="hero-h">
+    <p class="overline" id="hero-eyebrow">Lucro líquido nos últimos 30 dias</p>
+    <div class="hero__grid">
+      <div>
+        <h2 id="hero-h" class="sr">Resultado do período</h2>
+        <div class="hero__figure" id="hero-net">R$ 0</div>
+        <p class="hero__note" id="hero-note">Lance o primeiro dia para começar a medir a operação.</p>
+      </div>
+      <div class="hero__side">
+        <span class="verdict verdict--idle" id="verdict"><span aria-hidden="true">◇</span><span id="verdict-text">Sem dados</span></span>
+        <div class="hero__roi">
+          <b id="hero-roi">—</b><span>de retorno sobre o investido</span>
+        </div>
+        <dl class="split">
+          <div><dt>Margem líquida</dt><dd id="hero-margin">—</dd></div>
+          <div><dt>ROAS</dt><dd id="hero-roas">—</dd></div>
+          <div><dt>Dias no lucro</dt><dd id="hero-greendays">—</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Indicadores do período"></section>
+
+  <section class="panel rise" style="--d:210ms" aria-labelledby="proj-h">
+    <div class="panel__head">
+      <p class="overline">Projeção</p>
+      <div class="segbar" role="group" aria-label="Ritmo usado na projeção" id="pace-seg">
+        <button type="button" data-pace="7" aria-pressed="true">Ritmo de 7 dias</button>
+        <button type="button" data-pace="14" aria-pressed="false">14</button>
+        <button type="button" data-pace="30" aria-pressed="false">30</button>
+      </div>
+    </div>
+    <h2 id="proj-h" class="title">Se seguir nesse ritmo, <em>os próximos 30 dias</em></h2>
+    <dl class="proj__grid" id="proj-grid"></dl>
+    <p class="proj__pace" id="proj-pace">Ritmo indisponível — sem lançamentos.</p>
+
+    <div class="meter">
+      <div class="meter__top">
+        <span class="metainput">
+          <label for="meta-input">Meta de lucro em 30 dias</label>
+          <span class="inputbox inputbox--money"><span class="inputbox__prefix">R$</span>
+            <input id="meta-input" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+          </span>
+        </span>
+        <span class="chip" id="meta-chip"><span class="chip__dot"></span><span id="meta-chip-text">Defina uma meta</span></span>
+      </div>
+      <div class="meter__track" id="meter-track" role="img" aria-label="Progresso da projeção contra a meta">
+        <div class="meter__fill" id="meter-fill"></div>
+      </div>
+      <div class="meter__scale"><span>R$ 0</span><span id="meter-max">meta</span></div>
+    </div>
+  </section>
+
+  <div class="charts">
+    <section class="panel rise chart" style="--d:270ms" aria-labelledby="c1-h">
+      <div class="chart__head">
+        <h3 id="c1-h" class="title">Fluxo diário</h3>
+        <span class="chart__hint">Gasto em ADS contra faturamento, dia a dia</span>
+        <button type="button" class="tolink" data-goto="ledger">Ver tabela</button>
+      </div>
+      <div class="legend">
+        <span class="legend__item"><span class="legend__key legend__key--sq" style="--k:var(--ads)"></span>Gasto em ADS</span>
+        <span class="legend__item"><span class="legend__key legend__key--sq" style="--k:var(--rev)"></span>Faturamento</span>
+      </div>
+      <div class="plot" id="plot-flow"></div>
+    </section>
+
+    <section class="panel rise chart" style="--d:310ms" aria-labelledby="c2-h">
+      <div class="chart__head">
+        <h3 id="c2-h" class="title">Lucro acumulado e projeção</h3>
+        <span class="chart__hint">Realizado até hoje, projetado 30 dias à frente com faixa de incerteza</span>
+        <button type="button" class="tolink" data-goto="ledger">Ver tabela</button>
+      </div>
+      <div class="legend">
+        <span class="legend__item"><span class="legend__key" style="--k:var(--net)"></span>Realizado</span>
+        <span class="legend__item"><span class="legend__key legend__key--dash" style="--k:var(--net-lit)"></span>Projetado</span>
+        <span class="legend__item"><span class="legend__key legend__key--sq" style="--k:var(--net);opacity:.4"></span>Faixa de incerteza (±1 desvio-padrão)</span>
+      </div>
+      <div class="plot" id="plot-cum"></div>
+    </section>
+
+    <section class="panel rise chart" style="--d:350ms" aria-labelledby="c3-h">
+      <div class="chart__head">
+        <h3 id="c3-h" class="title">ROI por dia</h3>
+        <span class="chart__hint">Acima da linha zero você pagou o tráfego; abaixo, não</span>
+        <button type="button" class="tolink" data-goto="ledger">Ver tabela</button>
+      </div>
+      <div class="legend">
+        <span class="legend__item"><span class="legend__key legend__key--sq" style="--k:var(--rev)"></span>Dia no lucro</span>
+        <span class="legend__item"><span class="legend__key legend__key--sq" style="--k:var(--ads)"></span>Dia no prejuízo</span>
+      </div>
+      <div class="plot" id="plot-roi"></div>
+    </section>
+  </div>
+
+  <section aria-labelledby="econ-h">
+    <h2 id="econ-h" class="sr">Economia unitária</h2>
+    <dl class="econ rise" id="econ" style="--d:390ms"></dl>
+  </section>
+
+  <section class="panel rise" style="--d:410ms" id="campaigns" aria-labelledby="campaigns-h">
+    <div class="panel__head">
+      <p class="overline">Desempenho por campanha</p>
+      <div class="segbar" role="group" aria-label="Agrupar desempenho por" id="campaign-seg">
+        <button type="button" data-group="criativo" aria-pressed="true">Criativo</button>
+        <button type="button" data-group="oferta" aria-pressed="false">Oferta</button>
+        <button type="button" data-group="publico" aria-pressed="false">Público</button>
+      </div>
+    </div>
+    <h2 id="campaigns-h" class="title">Como cada <em>criativo, oferta ou público</em> performa</h2>
+    <p class="chart__hint" style="margin-top:6px;">Soma dos dias do período selecionado acima que têm esse campo preenchido.</p>
+    <div id="campaigns-body"></div>
+  </section>
+
+  <section class="panel rise" style="--d:430ms" id="ledger" aria-labelledby="ledger-h">
+    <p class="overline">Livro-caixa</p>
+    <h2 id="ledger-h" class="title">Lançamento do dia</h2>
+    <form class="form" id="entry-form" autocomplete="off">
+      <div class="field-wrap">
+        <label for="f-date">Data</label>
+        <span class="inputbox"><input id="f-date" name="date" type="date" required></span>
+        <span class="datechips">
+          <button type="button" data-day="0">Hoje</button>
+          <button type="button" data-day="-1">Ontem</button>
+        </span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-ads">Gasto em ADS</label>
+        <span class="inputbox inputbox--money"><span class="inputbox__prefix">R$</span>
+          <input id="f-ads" name="ads" type="text" inputmode="decimal" placeholder="0,00">
+        </span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-extra">Outros custos</label>
+        <span class="inputbox inputbox--money"><span class="inputbox__prefix">R$</span>
+          <input id="f-extra" name="extra" type="text" inputmode="decimal" placeholder="0,00">
+        </span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-cost">Custo do produto</label>
+        <span class="inputbox inputbox--money"><span class="inputbox__prefix">R$</span>
+          <input id="f-cost" name="cost" type="text" inputmode="decimal" placeholder="0,00">
+        </span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-rev">Valor recebido</label>
+        <span class="inputbox inputbox--money"><span class="inputbox__prefix">R$</span>
+          <input id="f-rev" name="rev" type="text" inputmode="decimal" placeholder="0,00">
+        </span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-sales">Vendas</label>
+        <span class="inputbox"><input id="f-sales" name="sales" type="text" inputmode="numeric" placeholder="0"></span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-criativo">Criativo</label>
+        <span class="inputbox"><input id="f-criativo" name="criativo" type="text" placeholder="ex.: vídeo depoimento" maxlength="40"></span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-oferta">Oferta</label>
+        <span class="inputbox"><input id="f-oferta" name="oferta" type="text" placeholder="ex.: combo lançamento" maxlength="40"></span>
+      </div>
+      <div class="field-wrap">
+        <label for="f-publico">Público</label>
+        <span class="inputbox"><input id="f-publico" name="publico" type="text" placeholder="ex.: mulheres 25-45" maxlength="40"></span>
+      </div>
+      <div class="field-wrap field-wrap--wide">
+        <label for="f-note">Observação</label>
+        <span class="inputbox"><input id="f-note" name="note" type="text" placeholder="qualquer outro detalhe…" maxlength="90"></span>
+      </div>
+      <div class="form__actions">
+        <button type="submit" class="btn btn--primary" id="save-btn">Salvar dia</button>
+        <button type="button" class="btn btn--ghost" id="cancel-btn" hidden>Cancelar</button>
+      </div>
+    </form>
+
+    <div id="ledger-body"></div>
+
+    <div class="foot">
+      <span id="rows-count">Nenhum lançamento</span>
+      <span class="foot__actions">
+        <input type="file" id="csv-input" accept=".csv,text/csv" hidden>
+        <button type="button" class="btn btn--ghost" id="csv-import-btn">Importar CSV</button>
+        <button type="button" class="btn btn--ghost" id="csv-btn" hidden>Exportar CSV</button>
+        <button type="button" class="btn btn--ghost btn--danger" id="demo-clear-btn" hidden>Remover exemplos</button>
+      </span>
+    </div>
+  </section>
+</main>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<script type="module">
+"use strict";
+
+/* ═══ Utilidades ═══════════════════════════════════════════════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* Fora do artifact (arquivo aberto direto no navegador) não existe
+   window.claude: o download sai por Blob. Dentro do artifact o sandbox
+   bloqueia Blob e <a download>, então lá só a capability serve. */
+const STANDALONE = typeof window.claude?.use !== "function";
+
+const brl = (v, cents = false) => new Intl.NumberFormat("pt-BR", {
+  style: "currency", currency: "BRL",
+  minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0
+}).format(Number.isFinite(v) ? v : 0);
+
+function compact(v) {
+  const a = Math.abs(v);
+  const sign = v < 0 ? "-" : "";
+  if (a >= 1e6) return sign + (a / 1e6).toFixed(a >= 1e7 ? 0 : 1).replace(".", ",") + "M";
+  if (a >= 1e3) return sign + (a / 1e3).toFixed(a >= 1e4 ? 0 : 1).replace(".", ",") + "k";
+  return sign + String(Math.round(a));
+}
+const brlCompact = v => (v < 0 ? "-" : "") + "R$ " + compact(Math.abs(v)).replace("-", "");
+
+function pct(v, signed = true) {
+  if (v === null || !Number.isFinite(v)) return "—";
+  const n = v * 100;
+  const s = signed && n > 0 ? "+" : "";
+  const d = Math.abs(n) < 10 ? 1 : 0;
+  return s + n.toFixed(d).replace(".", ",") + "%";
+}
+const ratio = v => (v === null || !Number.isFinite(v)) ? "—" : v.toFixed(2).replace(".", ",") + "×";
+
+function parseNum(s) {
+  if (s == null) return 0;
+  let t = String(s).trim().replace(/\s|R\$/gi, "");
+  if (!t) return 0;
+  if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+  const v = parseFloat(t);
+  return Number.isFinite(v) ? v : 0;
+}
+
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const parseISO = s => { const [y, m, d] = String(s).split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; };
+const dayDiff = (a, b) => Math.round((parseISO(b) - parseISO(a)) / 86400000);
+const todayISO = () => iso(new Date());
+const shortDate = s => { const d = parseISO(s); return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`; };
+const longDate = s => parseISO(s).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function toast(msg, kind = "") {
+  const box = $("#toasts");
+  const el = document.createElement("div");
+  el.className = "toast" + (kind ? " toast--" + kind : "");
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => { el.style.transition = "opacity .3s ease"; el.style.opacity = "0"; setTimeout(() => el.remove(), 320); }, 3900);
+}
+
+/* Rolagem numérica dos valores */
+const counters = new WeakMap();
+const rafs = new WeakMap();
+function setNumber(el, value, fmt) {
+  if (!el) return;
+  const from = counters.get(el) ?? 0;
+  counters.set(el, value);
+  const pending = rafs.get(el);
+  if (pending) { cancelAnimationFrame(pending); rafs.delete(el); }
+  if (REDUCED || document.hidden || from === value || !Number.isFinite(value)) { el.textContent = fmt(value); return; }
+  const t0 = performance.now(), dur = 820;
+  const step = now => {
+    const p = Math.min(1, (now - t0) / dur);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(from + (value - from) * e);
+    if (p < 1) rafs.set(el, requestAnimationFrame(step));
+    else rafs.delete(el);
+  };
+  rafs.set(el, requestAnimationFrame(step));
+}
+
+/* ═══ Estado ═══════════════════════════════════════════════════════ */
+const state = {
+  rows: new Map(),          // dateISO -> registro
+  range: 30,                // 7 | 14 | 30 | "all" | "week"
+  weekOffset: 0,            // 0 = semana corrente (calendário), -1 = anterior…
+  pace: 7,                  // 7 | 14 | 30
+  meta: 0,
+  editing: null,
+  campaignGroup: "criativo" // criativo | oferta | publico
+};
+let firstPaint = { flow: true, cum: true, roi: true };
+let lastSeries = [];
+
+/* ═══ Persistência: Supabase na nuvem, com localStorage de reserva ═
+   Versão para domínio próprio (fora do Claude Artifact): troca o
+   window.claude.use("db") por um projeto Supabase dedicado. Sem
+   login (decisão explícita) — a proteção é só o link não circular. */
+const LS_ROWS = "caixax1.rows.v1";
+const LS_CFG = "caixax1.config.v1";
+
+const SUPABASE_URL = "https://wiilialkvfiztymfsebp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_R4Xq4_bDaJE8NKZorgFaow_ZsXVxUJQ";
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let cloudOK = false; // true só depois da 1ª leitura bem-sucedida da nuvem
+
+const store = {
+  get cloud() { return !!sb && cloudOK; },
+
+  readLocal() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(LS_ROWS) || "[]");
+      return Array.isArray(raw) ? raw : [];
+    } catch { return []; }
+  },
+  writeLocal() {
+    try { localStorage.setItem(LS_ROWS, JSON.stringify([...state.rows.values()])); } catch {}
+  },
+  readLocalCfg() {
+    try { return JSON.parse(localStorage.getItem(LS_CFG) || "{}") || {}; } catch { return {}; }
+  },
+  writeLocalCfg(cfg) {
+    try { localStorage.setItem(LS_CFG, JSON.stringify(cfg)); } catch {}
+  },
+
+  async save(row) {
+    state.rows.set(row.data, row);
+    this.writeLocal();
+    if (sb) {
+      try {
+        const { error } = await sb.from("dias").upsert(row, { onConflict: "data" });
+        if (error) throw error;
+      } catch (e) { dbError(e, "salvar o lançamento"); }
+    }
+    render();
+  },
+  async saveMany(rows) {
+    rows.forEach(r => state.rows.set(r.data, r));
+    this.writeLocal();
+    render();
+    if (sb) {
+      try {
+        const { error } = await sb.from("dias").upsert(rows, { onConflict: "data" });
+        if (error) throw error;
+      } catch (e) { dbError(e, "salvar os lançamentos"); }
+    }
+  },
+  async remove(date) {
+    state.rows.delete(date);
+    this.writeLocal();
+    if (sb) {
+      try {
+        const { error } = await sb.from("dias").delete().eq("data", date);
+        if (error) throw error;
+      } catch (e) { dbError(e, "excluir o lançamento"); }
+    }
+    render();
+  },
+  async removeMany(dates) {
+    dates.forEach(d => state.rows.delete(d));
+    this.writeLocal();
+    if (sb) {
+      try {
+        const { error } = await sb.from("dias").delete().in("data", dates);
+        if (error) throw error;
+      } catch (e) { dbError(e, "limpar os exemplos"); }
+    }
+    render();
+  },
+  async saveMeta(v) {
+    state.meta = v;
+    this.writeLocalCfg({ meta: v });
+    if (sb) {
+      try {
+        const { error } = await sb.from("config").upsert({ id: true, meta: v });
+        if (error) throw error;
+      } catch (e) { dbError(e, "guardar a meta"); }
+    }
+  }
+};
+
+function dbError(e, action) {
+  console.error(e);
+  const msg = e && e.message ? String(e.message) : "";
+  const map = [
+    [/JWT|apikey|api key|401|403/i, "A chave de acesso à nuvem não foi aceita. Os dados seguem salvos neste navegador."],
+    [/Failed to fetch|NetworkError|network/i, "Sem conexão com a nuvem agora. Os dados ficaram salvos neste navegador."],
+    [/violates row-level security/i, "O banco recusou essa operação (permissão). Os dados seguem neste navegador."]
+  ];
+  const hit = map.find(([re]) => re.test(msg));
+  toast(hit ? hit[1] : `Não foi possível ${action}. Os dados seguem neste navegador.`, "bad");
+}
+
+function markSource() {
+  const chip = $("#src-chip");
+  chip.classList.toggle("chip--live", store.cloud);
+  chip.classList.toggle("chip--local", !store.cloud);
+  $("#src-label").textContent = store.cloud ? "Nuvem · sincronizado" : "Só neste navegador";
+}
+
+/* ═══ Cálculos ═════════════════════════════════════════════════════ */
+function normalize(r) {
+  const inv = (r.ads || 0) + (r.extra || 0);
+  const lucro = (r.receita || 0) - inv;
+  /* Custo do produto é variável, por venda — não entra no investimento
+     (que é só tráfego) nem no lucro líquido (fonte de verdade acima).
+     Vira uma métrica separada: margem de contribuição. */
+  const custoVar = (r.custo || 0) * (r.vendas || 0);
+  const margemContrib = lucro - custoVar;
+  return {
+    ...r,
+    inv, lucro, custoVar, margemContrib,
+    roi: inv > 0 ? lucro / inv : null,
+    roas: (r.ads || 0) > 0 ? (r.receita || 0) / r.ads : null
+  };
+}
+
+const sortedRows = () => [...state.rows.values()].sort((a, b) => a.data < b.data ? -1 : 1);
+
+/** Série diária contínua (dias sem lançamento entram como zero). */
+function buildSeries(fromISO, toISO) {
+  const out = [];
+  let cur = parseISO(fromISO);
+  const end = parseISO(toISO);
+  let cum = 0;
+  while (cur <= end) {
+    const key = iso(cur);
+    const raw = state.rows.get(key) || { data: key, ads: 0, extra: 0, custo: 0, receita: 0, vendas: 0 };
+    const r = normalize(raw);
+    cum += r.lucro;
+    out.push({ ...r, cum, filled: !state.rows.has(key) });
+    cur = addDays(cur, 1);
+  }
+  return out;
+}
+
+function bounds() {
+  const rows = sortedRows();
+  if (!rows.length) return null;
+  const first = rows[0].data;
+  const last = rows[rows.length - 1].data;
+  const anchor = dayDiff(todayISO(), last) > 0 ? last : todayISO();
+  return { first, last, anchor };
+}
+
+/** Segunda-feira da semana calendário que contém `d`. */
+function weekStart(d) {
+  const day = d.getDay(); // 0 = domingo … 6 = sábado
+  return addDays(d, day === 0 ? -6 : 1 - day);
+}
+function weekRangeFor(offset) {
+  const start = weekStart(addDays(new Date(), offset * 7));
+  return { from: iso(start), to: iso(addDays(start, 6)) };
+}
+
+function windowRange() {
+  const b = bounds();
+  if (!b) return null;
+  if (state.range === "week") return weekRangeFor(state.weekOffset);
+  if (state.range === "all") return { from: b.first, to: b.anchor };
+  const want = iso(addDays(parseISO(b.anchor), -(Number(state.range) - 1)));
+  return { from: dayDiff(want, b.first) > 0 ? b.first : want, to: b.anchor };
+}
+
+function totals(series) {
+  const t = series.reduce((a, r) => ({
+    ads: a.ads + (r.ads || 0),
+    extra: a.extra + (r.extra || 0),
+    receita: a.receita + (r.receita || 0),
+    vendas: a.vendas + (r.vendas || 0),
+    custoVar: a.custoVar + (r.custoVar || (r.custo || 0) * (r.vendas || 0))
+  }), { ads: 0, extra: 0, receita: 0, vendas: 0, custoVar: 0 });
+  t.inv = t.ads + t.extra;
+  t.lucro = t.receita - t.inv;
+  t.roi = t.inv > 0 ? t.lucro / t.inv : null;
+  t.roas = t.ads > 0 ? t.receita / t.ads : null;
+  t.margem = t.receita > 0 ? t.lucro / t.receita : null;
+  t.cpa = t.vendas > 0 ? t.inv / t.vendas : null;
+  t.ticket = t.vendas > 0 ? t.receita / t.vendas : null;
+  t.margemContrib = t.lucro - t.custoVar;
+  t.margemContribPct = t.receita > 0 ? t.margemContrib / t.receita : null;
+  t.dias = series.length;
+  t.diasLucro = series.filter(r => r.inv > 0 && r.lucro > 0).length;
+  t.diasAtivos = series.filter(r => !r.filled).length;
+  return t;
+}
+
+/** Ritmo: média por dia corrido dentro da janela de ritmo escolhida. */
+/** Ritmo com faixa de incerteza: a média de N dias trata o resultado como
+ *  certo, o que é otimista quando o dia a dia varia muito. O desvio-padrão
+ *  amostral do lucro diário na janela do ritmo, propagado para 30 dias
+ *  assumindo dias aproximadamente independentes (var(soma) = n·var(dia),
+ *  logo desvio(soma) = desvio(dia)·√n), dá uma faixa em vez de uma linha só. */
+function paceModel() {
+  const b = bounds();
+  if (!b) return null;
+  const elapsed = dayDiff(b.first, b.anchor) + 1;
+  const days = Math.max(1, Math.min(Number(state.pace), elapsed));
+  const from = iso(addDays(parseISO(b.anchor), -(days - 1)));
+  const daily = buildSeries(from, b.anchor);
+  const t = totals(daily);
+  const lucroMedio = t.lucro / days;
+
+  let sd = 0;
+  if (days > 1) {
+    const variancia = daily.reduce((a, r) => a + (r.lucro - lucroMedio) ** 2, 0) / (days - 1);
+    sd = Math.sqrt(variancia);
+  }
+  const sd30 = sd * Math.sqrt(30);
+  const lucro30 = lucroMedio * 30;
+
+  return {
+    days,
+    ads: t.ads / days,
+    inv: t.inv / days,
+    receita: t.receita / days,
+    lucro: lucroMedio,
+    vendas: t.vendas / days,
+    roi: t.roi,
+    sd,
+    p30: {
+      ads: (t.ads / days) * 30,
+      inv: (t.inv / days) * 30,
+      receita: (t.receita / days) * 30,
+      lucro: lucro30,
+      lucroLo: lucro30 - sd30,
+      lucroHi: lucro30 + sd30,
+      vendas: (t.vendas / days) * 30,
+      roi: t.roi
+    }
+  };
+}
+
+/* ═══ Blocos de SVG ════════════════════════════════════════════════ */
+function roundedTop(x, y, w, h, r) {
+  const rr = Math.max(0, Math.min(r, w / 2, Math.abs(h)));
+  if (h <= 0) return "";
+  return `M${x} ${y + h}V${y + rr}A${rr} ${rr} 0 0 1 ${x + rr} ${y}H${x + w - rr}A${rr} ${rr} 0 0 1 ${x + w} ${y + rr}V${y + h}Z`;
+}
+function roundedBottom(x, y, w, h, r) {
+  const rr = Math.max(0, Math.min(r, w / 2, Math.abs(h)));
+  if (h <= 0) return "";
+  return `M${x} ${y}V${y + h - rr}A${rr} ${rr} 0 0 0 ${x + rr} ${y + h}H${x + w - rr}A${rr} ${rr} 0 0 0 ${x + w} ${y + h - rr}V${y}Z`;
+}
+
+function niceStep(raw) {
+  const mag = Math.pow(10, Math.floor(Math.log10(Math.abs(raw) || 1)));
+  const norm = Math.abs(raw) / mag;
+  return (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+}
+
+/**
+ * Escala de eixo. `floor` é um piso duro do domínio (o ROI não pode ser
+ * pior que -100%, então o eixo não desce além disso). Um mergulho
+ * pequeno abaixo de zero não gasta um degrau inteiro do eixo.
+ */
+function scale(min, max, count = 4, floor = null) {
+  let lo0 = Math.min(0, min), hi0 = Math.max(0, max);
+  if (floor !== null) lo0 = Math.max(lo0, floor);
+  if (hi0 === lo0) hi0 = lo0 + 1;
+  const step = niceStep((hi0 - lo0) / count);
+  const hi = Math.ceil(hi0 / step) * step;
+  let lo = Math.floor(lo0 / step) * step;
+  const clamped = floor !== null && lo < floor;
+  if (clamped) lo = floor;
+  else if (lo0 > lo + step * 0.5) lo = lo0 - (hi - lo0) * 0.04;
+  const ticks = [];
+  for (let v = Math.ceil((lo - step * 1e-6) / step) * step; v <= hi + step * 1e-6; v += step) {
+    ticks.push(Math.abs(v) < step * 1e-6 ? 0 : v);
+  }
+  if (clamped && Math.abs(ticks[0] - lo) > step * 0.25) ticks.unshift(lo);
+  if (lo <= 0 && hi >= 0 && !ticks.some(t => Math.abs(t) < step * 1e-6)) ticks.push(0);
+  return { lo, hi, ticks };
+}
+
+/** Ticks do eixo X que nunca encostam: só rotula o último se ele não
+ *  colidir com o rótulo anterior. */
+function xTicks(n, maxLabels = 8) {
+  const every = Math.max(1, Math.ceil(n / maxLabels));
+  const idx = [];
+  for (let i = 0; i < n; i += every) idx.push(i);
+  const last = n - 1;
+  if (idx.length && idx[idx.length - 1] !== last &&
+      last - idx[idx.length - 1] >= Math.max(1, Math.ceil(every * 0.6))) idx.push(last);
+  return new Set(idx);
+}
+
+/** Ticks de ROI em porcentagem inteira. */
+const pctAxis = v => (v > 0 ? "+" : "") + Math.round(v * 100) + "%";
+
+function emptyPlot(host, msg) {
+  host.innerHTML = `<div class="empty-plot">${esc(msg)}</div>`;
+}
+
+/* ── Gráfico 1: colunas agrupadas ─────────────────────────────────── */
+function drawFlow(host, series) {
+  if (!series.length || series.every(r => r.filled)) return emptyPlot(host, "Sem lançamentos no período");
+  const W = Math.max(320, host.clientWidth || 640);
+  const padL = 56, padR = 14, padT = 14, padB = 30;
+  const H = 250 + padB;
+  const pw = W - padL - padR, ph = H - padT - padB;
+
+  const maxV = Math.max(1, ...series.map(r => Math.max(r.inv, r.receita || 0)));
+  const { lo, hi, ticks } = scale(0, maxV, 4);
+  const y = v => padT + ph - ((v - lo) / (hi - lo)) * ph;
+  const band = pw / series.length;
+  const gap = 2;
+  const bw = Math.max(3, Math.min(24, (band - gap - Math.max(6, band * 0.28)) / 2));
+  const anim = firstPaint.flow && !REDUCED;
+  const xi = xTicks(series.length);
+
+  let g = "";
+  ticks.forEach(t => {
+    g += `<line class="gridline" x1="${padL}" y1="${y(t).toFixed(1)}" x2="${W - padR}" y2="${y(t).toFixed(1)}"/>`;
+    g += `<text class="axis-text axis-text--val" x="${padL - 10}" y="${(y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(brlCompact(t))}</text>`;
+  });
+
+  let bars = "", bands = "", xs = "";
+  series.forEach((r, i) => {
+    const cx = padL + band * i + band / 2;
+    const x1 = cx - gap / 2 - bw, x2 = cx + gap / 2;
+    const d = anim ? `--d:${Math.min(560, i * 22)}ms` : "";
+    const cls = anim ? "draw-bar" : "";
+    const hA = Math.max(0, padT + ph - y(r.inv)), hB = Math.max(0, padT + ph - y(r.receita || 0));
+    if (hA > 0.4) bars += `<path class="${cls}" style="${d}" d="${roundedTop(x1, y(r.inv), bw, hA, 4)}" fill="var(--ads)"/>`;
+    if (hB > 0.4) bars += `<path class="${cls}" style="${d}" d="${roundedTop(x2, y(r.receita || 0), bw, hB, 4)}" fill="var(--rev)"/>`;
+    bands += `<rect class="band" data-i="${i}" x="${(padL + band * i).toFixed(1)}" y="${padT}" width="${band.toFixed(1)}" height="${ph}"/>`;
+    if (xi.has(i)) {
+      xs += `<text class="axis-text" x="${cx.toFixed(1)}" y="${H - 10}" text-anchor="middle">${esc(shortDate(r.data))}</text>`;
+    }
+  });
+
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Colunas de gasto em ADS e faturamento por dia. Valores exatos na tabela do livro-caixa.">
+    ${g}${bars}
+    <line class="zeroline" x1="${padL}" y1="${padT + ph}" x2="${W - padR}" y2="${padT + ph}"/>
+    ${xs}${bands}
+  </svg><div class="tip" id="tip-flow"></div>`;
+
+  wireBands(host, series, $("#tip-flow", host), r => `
+    <div class="tip__row"><span class="legend__key legend__key--sq" style="--k:var(--ads)"></span>Gasto <b>${esc(brl(r.inv, true))}</b></div>
+    <div class="tip__row"><span class="legend__key legend__key--sq" style="--k:var(--rev)"></span>Recebido <b>${esc(brl(r.receita || 0, true))}</b></div>
+    <div class="tip__row"><span class="legend__key legend__key--sq" style="--k:var(--net)"></span>Lucro <b>${esc(brl(r.lucro, true))}</b></div>`,
+    { padL, band, padT, ph });
+  firstPaint.flow = false;
+}
+
+/* ── Gráfico 2: acumulado + projeção ──────────────────────────────── */
+function drawCum(host, series, pace) {
+  if (!series.length || series.every(r => r.filled)) return emptyPlot(host, "Sem lançamentos no período");
+  const W = Math.max(320, host.clientWidth || 640);
+  const padL = 56, padR = 26, padT = 26, padB = 30;
+  const H = 250 + padB;
+  const pw = W - padL - padR, ph = H - padT - padB;
+
+  const last = series[series.length - 1];
+  const daily = pace ? pace.lucro : 0;
+  /* Desvio-padrão diário propagado por √k: a incerteza cresce com o
+     horizonte, então a faixa se abre como um leque em vez de duas retas
+     paralelas. Em k=30 bate exatamente com a faixa mostrada no painel. */
+  const sdDay = pace ? pace.sd : 0;
+  const proj = [];
+  for (let k = 1; k <= 30; k++) {
+    const spread = sdDay * Math.sqrt(k);
+    const cum = last.cum + daily * k;
+    proj.push({ data: iso(addDays(parseISO(last.data), k)), cum, lo: cum - spread, hi: cum + spread, projected: true });
+  }
+  const all = [...series, ...proj];
+  const hasBand = sdDay > 0;
+  const vals = hasBand
+    ? [...all.map(p => p.cum), ...proj.map(p => p.lo), ...proj.map(p => p.hi)]
+    : all.map(p => p.cum);
+  const { lo, hi, ticks } = scale(Math.min(...vals), Math.max(...vals), 4);
+  const y = v => padT + ph - ((v - lo) / (hi - lo)) * ph;
+  const x = i => padL + (all.length === 1 ? pw / 2 : (i / (all.length - 1)) * pw);
+
+  let g = "";
+  ticks.forEach(t => {
+    const cls = t === 0 ? "zeroline" : "gridline";
+    g += `<line class="${cls}" x1="${padL}" y1="${y(t).toFixed(1)}" x2="${W - padR}" y2="${y(t).toFixed(1)}"/>`;
+    g += `<text class="axis-text axis-text--val" x="${padL - 10}" y="${(y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(brlCompact(t))}</text>`;
+  });
+
+  const realPts = series.map((p, i) => `${x(i).toFixed(1)},${y(p.cum).toFixed(1)}`);
+  const projPts = proj.map((p, k) => `${x(series.length - 1 + 1 + k).toFixed(1)},${y(p.cum).toFixed(1)}`);
+  const anchorPt = `${x(series.length - 1).toFixed(1)},${y(last.cum).toFixed(1)}`;
+  const anchorX = x(series.length - 1).toFixed(1), anchorY = y(last.cum).toFixed(1);
+
+  /* Faixa sombreada: sobe pela borda de cima (hi), desce pela de baixo
+     (lo) de trás para frente, fechando no ponto-âncora dos dois lados. */
+  let bandPath = "";
+  if (hasBand) {
+    const top = proj.map((p, k) => `${x(series.length + k).toFixed(1)},${y(p.hi).toFixed(1)}`);
+    const bottom = [...proj].reverse().map((p, k) => `${x(series.length + (proj.length - 1 - k)).toFixed(1)},${y(p.lo).toFixed(1)}`);
+    bandPath = `M${anchorX} ${anchorY} L${top.join(" L")} L${bottom.join(" L")} Z`;
+  }
+
+  const anim = firstPaint.cum && !REDUCED;
+  const approxLen = Math.round(pw + ph);
+
+  let xs = "";
+  const xi = xTicks(all.length, 7);
+  all.forEach((p, i) => {
+    if (xi.has(i)) {
+      xs += `<text class="axis-text" x="${x(i).toFixed(1)}" y="${H - 10}" text-anchor="middle" ${p.projected ? 'opacity=".62"' : ""}>${esc(shortDate(p.data))}</text>`;
+    }
+  });
+
+  const endY = y(last.cum), projEndY = y(proj[proj.length - 1].cum);
+  const clampY = v => Math.max(padT - 6, Math.min(padT + ph - 4, v));
+
+  /* Rótulos diretos medidos, para nunca estourarem a área do gráfico. */
+  const CH = 6.7;                                  // largura ~ de um dígito do mono a 11px
+  const hojeTxt = `hoje ${brlCompact(last.cum)}`;
+  const hojeX0 = x(series.length - 1);
+  const hojeEnd = hojeX0 - 8 - hojeTxt.length * CH >= padL - 4;
+  const projTxt = `+30d ${brlCompact(proj[proj.length - 1].cum)}`;
+
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lucro acumulado realizado e projeção de 30 dias, com faixa de incerteza. Valores exatos na tabela do livro-caixa.">
+    ${g}
+    ${bandPath ? `<path d="${bandPath}" fill="var(--net)" opacity=".14" class="${anim ? "fade-in" : ""}"/>` : ""}
+    <polyline points="${realPts.join(" ")}" fill="none" stroke="var(--net)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"
+      class="${anim ? "draw-line" : ""}" style="${anim ? `--len:${approxLen};stroke-dasharray:${approxLen}` : ""}"/>
+    <polyline points="${anchorPt} ${projPts.join(" ")}" fill="none" stroke="var(--net-lit)" stroke-width="2" stroke-dasharray="5 6"
+      stroke-linecap="round" opacity=".9" class="${anim ? "fade-in" : ""}"/>
+    <circle cx="${x(series.length - 1).toFixed(1)}" cy="${endY.toFixed(1)}" r="4.5" fill="var(--net)" stroke="var(--surface)" stroke-width="2"/>
+    <circle cx="${x(all.length - 1).toFixed(1)}" cy="${projEndY.toFixed(1)}" r="4.5" fill="var(--ground)" stroke="var(--net-lit)" stroke-width="2"/>
+    <text class="label-text" x="${(hojeEnd ? hojeX0 - 8 : hojeX0 + 8).toFixed(1)}" y="${clampY(endY - 13).toFixed(1)}" text-anchor="${hojeEnd ? "end" : "start"}">${esc(hojeTxt)}</text>
+    <text class="label-text" x="${(W - padR + 6).toFixed(1)}" y="${clampY(projEndY - 13).toFixed(1)}" text-anchor="end" fill="var(--ink-3)">${esc(projTxt)}</text>
+    ${xs}
+  </svg>`;
+  firstPaint.cum = false;
+}
+
+/* ── Gráfico 3: colunas divergentes de ROI ────────────────────────── */
+function drawRoi(host, series) {
+  const active = series.filter(r => r.inv > 0);
+  if (!active.length) return emptyPlot(host, "Sem gasto em ADS lançado no período");
+  const W = Math.max(320, host.clientWidth || 640);
+  const padL = 56, padR = 14, padT = 20, padB = 30;
+  const H = 210 + padB;
+  const pw = W - padL - padR, ph = H - padT - padB;
+
+  const rois = series.map(r => r.roi).filter(v => v !== null);
+  /* O ROI não pode ser pior que -100%: o eixo para ali. */
+  const { lo, hi, ticks } = scale(Math.min(-0.2, ...rois), Math.max(0.2, ...rois), 4, -1);
+  const y = v => padT + ph - ((v - lo) / (hi - lo)) * ph;
+  const y0 = y(0);
+  const band = pw / series.length;
+  const bw = Math.max(3, Math.min(24, band - Math.max(2, band * 0.32)));
+  const anim = firstPaint.roi && !REDUCED;
+  const xi = xTicks(series.length);
+
+  let g = "";
+  ticks.forEach(t => {
+    const isZero = Math.abs(t) < 1e-9;
+    g += `<line class="${isZero ? "zeroline" : "gridline"}" x1="${padL}" y1="${y(t).toFixed(1)}" x2="${W - padR}" y2="${y(t).toFixed(1)}"/>`;
+    g += `<text class="axis-text axis-text--val" x="${padL - 10}" y="${(y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(pctAxis(t))}</text>`;
+  });
+
+  const best = active.reduce((a, r) => (r.roi > a.roi ? r : a), active[0]);
+  const worst = active.reduce((a, r) => (r.roi < a.roi ? r : a), active[0]);
+
+  let bars = "", bands = "", xs = "", marks = "";
+  series.forEach((r, i) => {
+    const cx = padL + band * i + band / 2;
+    const bx = cx - bw / 2;
+    const d = anim ? `--d:${Math.min(520, i * 22)}ms` : "";
+    if (r.roi !== null) {
+      const up = r.roi >= 0;
+      const h = Math.abs(y(r.roi) - y0);
+      if (h > 0.4) {
+        const path = up ? roundedTop(bx, y(r.roi), bw, h, 4) : roundedBottom(bx, y0, bw, h, 4);
+        bars += `<path class="${anim ? "draw-bar" : ""}" style="${d};--o:${up ? "bottom" : "top"}" d="${path}" fill="${up ? "var(--rev)" : "var(--ads)"}"/>`;
+      }
+      if (active.length > 1 && (r.data === best.data || r.data === worst.data)) {
+        const ly = up ? y(r.roi) - 7 : y0 - 7;
+        marks += `<text class="label-text" x="${cx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle">${esc(pct(r.roi))}</text>`;
+      }
+    }
+    bands += `<rect class="band" data-i="${i}" x="${(padL + band * i).toFixed(1)}" y="${padT}" width="${band.toFixed(1)}" height="${ph}"/>`;
+    if (xi.has(i)) {
+      xs += `<text class="axis-text" x="${cx.toFixed(1)}" y="${H - 10}" text-anchor="middle">${esc(shortDate(r.data))}</text>`;
+    }
+  });
+
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ROI diário acima e abaixo da linha zero. Valores exatos na tabela do livro-caixa.">
+    ${g}${bars}${marks}${xs}${bands}
+  </svg><div class="tip" id="tip-roi"></div>`;
+
+  wireBands(host, series, $("#tip-roi", host), r => `
+    <div class="tip__row"><span class="legend__key legend__key--sq" style="--k:${r.roi !== null && r.roi >= 0 ? "var(--rev)" : "var(--ads)"}"></span>ROI <b>${esc(pct(r.roi))}</b></div>
+    <div class="tip__row"><span class="legend__key legend__key--sq" style="--k:var(--net)"></span>Lucro <b>${esc(brl(r.lucro, true))}</b></div>
+    <div class="tip__row"><span class="legend__key legend__key--sq" style="--k:var(--ads)"></span>Investido <b>${esc(brl(r.inv, true))}</b></div>`,
+    { padL, band, padT, ph });
+  firstPaint.roi = false;
+}
+
+/* Alvos de hover largos: a faixa inteira do dia. */
+function wireBands(host, series, tip, body, geo) {
+  const svg = $("svg", host);
+  if (!svg || !tip) return;
+  const bands = [...svg.querySelectorAll(".band")];
+  const show = i => {
+    const r = series[i];
+    if (!r) return;
+    bands.forEach(b => b.classList.toggle("is-on", Number(b.dataset.i) === i));
+    tip.innerHTML = `<div class="tip__date">${esc(longDate(r.data))}${r.filled ? " · sem lançamento" : ""}</div>${body(r)}`;
+    const px = geo.padL + geo.band * i + geo.band / 2;
+    const rect = svg.getBoundingClientRect();
+    const scale = rect.width / svg.viewBox.baseVal.width;
+    tip.style.left = Math.max(84, Math.min(rect.width - 84, px * scale)) + "px";
+    tip.style.top = (geo.padT + geo.ph * 0.42) * scale + "px";
+    tip.dataset.on = "1";
+  };
+  const hide = () => { tip.dataset.on = "0"; bands.forEach(b => b.classList.remove("is-on")); };
+  bands.forEach(b => {
+    b.addEventListener("pointerenter", () => show(Number(b.dataset.i)));
+    b.addEventListener("pointermove", () => show(Number(b.dataset.i)));
+  });
+  svg.addEventListener("pointerleave", hide);
+}
+
+/* Sparkline do cartão: histórico em cinza, ponto atual na cor do cartão. */
+function sparkline(values, hue) {
+  const w = 74, h = 26, n = values.length;
+  if (n < 2) return "";
+  const min = Math.min(0, ...values), max = Math.max(1e-9, ...values);
+  const sx = i => (i / (n - 1)) * (w - 6) + 3;
+  const sy = v => h - 3 - ((v - min) / (max - min || 1)) * (h - 6);
+  const pts = values.map((v, i) => `${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(" ");
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <polyline points="${pts}" fill="none" stroke="var(--ink-3)" stroke-opacity=".55" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${sx(n - 1).toFixed(1)}" cy="${sy(values[n - 1]).toFixed(1)}" r="2.6" fill="${hue}"/>
+  </svg>`;
+}
+
+/* ═══ Renderização ═════════════════════════════════════════════════ */
+function render() {
+  const range = windowRange();
+  const series = range ? buildSeries(range.from, range.to) : [];
+  lastSeries = series;
+  const t = totals(series);
+  const pace = paceModel();
+
+  if (state.range === "week") $("#week-next").disabled = state.weekOffset >= 0;
+  renderSpan(range, series);
+  renderHero(t, series);
+  renderKpis(t, series, range);
+  renderProjection(pace, t);
+  renderCharts(series, pace);
+  renderEcon(t, series);
+  renderCampaigns(series);
+  renderLedger();
+}
+
+function weekLabel(offset) {
+  if (offset === 0) return "nesta semana";
+  if (offset === -1) return "na semana passada";
+  return offset < 0 ? `${Math.abs(offset)} semanas atrás` : `em ${Math.abs(offset)} semanas`;
+}
+
+function renderSpan(range, series) {
+  const el = $("#range-span");
+  if (!range) { el.textContent = "aguardando o primeiro lançamento"; return; }
+  el.textContent = `${shortDate(range.from)} → ${shortDate(range.to)} · ${series.length} ${series.length === 1 ? "dia" : "dias"}`;
+  const labels = { 7: "nos últimos 7 dias", 14: "nos últimos 14 dias", 30: "nos últimos 30 dias", all: "no período completo", week: weekLabel(state.weekOffset) };
+  $("#hero-eyebrow").textContent = `Lucro líquido ${labels[state.range]}`;
+}
+
+function renderHero(t, series) {
+  const fig = $("#hero-net");
+  fig.classList.toggle("hero__figure--down", t.lucro < 0);
+  fig.classList.toggle("hero__figure--up", t.lucro >= 0);
+  setNumber(fig, t.lucro, v => brl(v));
+
+  $("#hero-roi").textContent = pct(t.roi);
+  $("#hero-margin").textContent = pct(t.margem, false);
+  $("#hero-roas").textContent = ratio(t.roas);
+  $("#hero-greendays").textContent = t.diasAtivos ? `${t.diasLucro}/${t.diasAtivos}` : "—";
+
+  const v = $("#verdict"), vt = $("#verdict-text");
+  v.className = "verdict";
+  if (!series.length || t.inv === 0) {
+    v.classList.add("verdict--idle"); vt.textContent = "Sem dados";
+    v.firstElementChild.textContent = "◇";
+  } else if (t.roi !== null && t.roi >= 0.5) {
+    v.classList.add("verdict--good"); vt.textContent = "Operação no lucro";
+    v.firstElementChild.textContent = "▲";
+  } else if (t.roi !== null && t.roi >= 0) {
+    v.classList.add("verdict--warn"); vt.textContent = "Margem apertada";
+    v.firstElementChild.textContent = "◆";
+  } else {
+    v.classList.add("verdict--bad"); vt.textContent = "Operação no prejuízo";
+    v.firstElementChild.textContent = "▼";
+  }
+
+  const note = $("#hero-note");
+  if (!series.length) {
+    note.textContent = "Lance o primeiro dia para começar a medir a operação.";
+  } else if (t.inv === 0) {
+    note.textContent = `Você recebeu ${brl(t.receita)} sem gasto em ADS lançado no período. Lance o gasto para o ROI aparecer.`;
+  } else {
+    note.textContent = `Você investiu ${brl(t.inv)} e recebeu ${brl(t.receita)} em ${t.dias} ${t.dias === 1 ? "dia" : "dias"}. Cada R$ 1 em tráfego devolveu ${brl(t.roas || 0, true)} em vendas.`;
+  }
+}
+
+const KPI_DEFS = [
+  { key: "ads", label: "Gasto em ADS", hue: "var(--ads)", fmt: v => brl(v), pick: r => r.inv, good: "down" },
+  { key: "rev", label: "Valor recebido", hue: "var(--rev)", fmt: v => brl(v), pick: r => r.receita || 0, good: "up" },
+  { key: "roi", label: "ROI", hue: "var(--net)", fmt: null, pick: r => r.roi ?? 0, good: "up" },
+  { key: "roas", label: "ROAS", hue: "var(--net)", fmt: null, pick: r => r.roas ?? 0, good: "up" },
+  { key: "sales", label: "Vendas", hue: "var(--rev)", fmt: v => Math.round(v).toLocaleString("pt-BR"), pick: r => r.vendas || 0, good: "up" }
+];
+
+function renderKpis(t, series, range) {
+  const host = $("#kpis");
+  const prev = prevTotals(range);
+
+  if (!host.children.length) {
+    host.innerHTML = KPI_DEFS.map((d, i) => `
+      <article class="tile rise" style="--tile-hue:${d.hue};--d:${140 + i * 40}ms" data-k="${d.key}">
+        <p class="tile__label"><span class="swatch"></span>${esc(d.label)}</p>
+        <p class="tile__value" data-v>—</p>
+        <div class="tile__foot"><span class="delta delta--flat" data-delta></span><span data-spark></span></div>
+      </article>`).join("");
+  }
+
+  const values = {
+    ads: t.inv, rev: t.receita, roi: t.roi, roas: t.roas, sales: t.vendas
+  };
+  const prevValues = prev ? { ads: prev.inv, rev: prev.receita, roi: prev.roi, roas: prev.roas, sales: prev.vendas } : null;
+
+  KPI_DEFS.forEach(d => {
+    const card = host.querySelector(`[data-k="${d.key}"]`);
+    const vEl = card.querySelector("[data-v]");
+    const val = values[d.key];
+
+    if (d.key === "roi") vEl.textContent = pct(val);
+    else if (d.key === "roas") vEl.textContent = ratio(val);
+    else setNumber(vEl, val, d.fmt);
+
+    const dEl = card.querySelector("[data-delta]");
+    const pv = prevValues ? prevValues[d.key] : null;
+    dEl.className = "delta delta--flat";
+    if (pv === null || pv === undefined || !Number.isFinite(pv) || pv === 0 || val === null || !Number.isFinite(val)) {
+      dEl.textContent = "";
+    } else {
+      const ch = (val - pv) / Math.abs(pv);
+      const rising = ch > 0.005, falling = ch < -0.005;
+      const helpful = d.good === "up" ? rising : falling;
+      dEl.className = "delta " + (rising || falling ? (helpful ? "delta--up" : "delta--down") : "delta--flat");
+      dEl.textContent = `${pct(ch)} vs anterior`;
+    }
+
+    const sEl = card.querySelector("[data-spark]");
+    const last12 = series.slice(-12).map(d.pick);
+    sEl.innerHTML = last12.length > 1 ? sparkline(last12, d.hue) : "";
+  });
+}
+
+function prevTotals(range) {
+  if (!range) return null;
+  const len = dayDiff(range.from, range.to) + 1;
+  const prevTo = iso(addDays(parseISO(range.from), -1));
+  const prevFrom = iso(addDays(parseISO(prevTo), -(len - 1)));
+  const b = bounds();
+  if (!b || dayDiff(prevTo, b.first) > 0) return null;
+  return totals(buildSeries(dayDiff(prevFrom, b.first) > 0 ? b.first : prevFrom, prevTo));
+}
+
+const PROJ_DEFS = [
+  ["Investimento", p => brl(p.p30.inv), null],
+  ["Faturamento", p => brl(p.p30.receita), null],
+  ["Lucro líquido", p => brl(p.p30.lucro), p => p.days > 1 && p.sd > 0
+    ? `faixa: ${brl(p.p30.lucroLo)} a ${brl(p.p30.lucroHi)}`
+    : "faixa indisponível — ritmo com 1 dia de base"],
+  ["ROI no ritmo", p => pct(p.p30.roi), null],
+  ["Vendas", p => Math.round(p.p30.vendas).toLocaleString("pt-BR"), null]
+];
+
+function renderProjection(pace, t) {
+  const grid = $("#proj-grid");
+  if (!pace) {
+    grid.innerHTML = PROJ_DEFS.map(([l]) => `<div class="proj__cell"><dt>${esc(l)}</dt><dd>—</dd></div>`).join("");
+    $("#proj-pace").textContent = "Ritmo indisponível — sem lançamentos.";
+    renderMeter(0);
+    return;
+  }
+  grid.innerHTML = PROJ_DEFS.map(([l, f, s]) => {
+    const small = s ? s(pace) : null;
+    return `<div class="proj__cell"><dt>${esc(l)}</dt><dd>${esc(f(pace))}</dd>${small ? `<small>${esc(small)}</small>` : ""}</div>`;
+  }).join("");
+  $("#proj-pace").innerHTML =
+    `Base: <b>${pace.days} ${pace.days === 1 ? "dia corrido" : "dias corridos"}</b> · ` +
+    `<b>${esc(brl(pace.inv, true))}</b>/dia investido · ` +
+    `<b>${esc(brl(pace.receita, true))}</b>/dia recebido · ` +
+    `<b>${esc(brl(pace.lucro, true))}</b>/dia de lucro.`;
+  renderMeter(pace.p30.lucro);
+}
+
+function renderMeter(projected) {
+  const fill = $("#meter-fill"), track = $("#meter-track");
+  const chip = $("#meta-chip"), chipText = $("#meta-chip-text");
+  const max = $("#meter-max");
+  const meta = state.meta;
+
+  max.textContent = meta > 0 ? brl(meta) : "meta";
+  chip.classList.remove("chip--live", "chip--local");
+
+  if (!(meta > 0)) {
+    fill.style.width = "0%";
+    track.style.background = "rgba(255,255,255,.06)";
+    chipText.textContent = "Defina uma meta";
+    track.setAttribute("aria-label", "Nenhuma meta definida");
+    return;
+  }
+  const ratioV = Math.max(0, projected) / meta;
+  const hue = ratioV >= 1 ? "var(--rev)" : ratioV >= 0.6 ? "var(--warn)" : "var(--ads)";
+  track.style.setProperty("--meter-hue", hue);
+  track.style.background = `color-mix(in srgb, ${hue} 20%, rgba(255,255,255,.06))`;
+  fill.style.width = Math.min(100, ratioV * 100).toFixed(1) + "%";
+  chip.classList.add(ratioV >= 1 ? "chip--live" : "chip--local");
+  chipText.textContent = ratioV >= 1
+    ? `Meta batida no ritmo · ${pct(ratioV - 1)} acima`
+    : `${pct(ratioV, false)} da meta no ritmo atual`;
+  track.setAttribute("aria-label", `Projeção de ${brl(projected)} contra meta de ${brl(meta)}: ${pct(ratioV, false)}`);
+}
+
+function renderCharts(series, pace) {
+  drawFlow($("#plot-flow"), series);
+  drawCum($("#plot-cum"), series, pace);
+  drawRoi($("#plot-roi"), series);
+}
+
+function renderEcon(t, series) {
+  const active = series.filter(r => r.inv > 0);
+  const best = active.length ? active.reduce((a, r) => (r.lucro > a.lucro ? r : a), active[0]) : null;
+  const worst = active.length ? active.reduce((a, r) => (r.lucro < a.lucro ? r : a), active[0]) : null;
+  const cells = [
+    ["CPA", t.cpa === null ? "—" : brl(t.cpa, true), t.vendas ? `${t.vendas} ${t.vendas === 1 ? "venda" : "vendas"} no período` : "sem vendas lançadas"],
+    ["Ticket médio", t.ticket === null ? "—" : brl(t.ticket, true), t.ticket !== null && t.cpa !== null ? `sobra ${brl(t.ticket - t.cpa, true)} por venda` : "—"],
+    ["Margem líquida", pct(t.margem, false), "do que entrou virou lucro"],
+    ["Margem de contribuição", t.custoVar > 0 ? brl(t.margemContrib) : "—", t.custoVar > 0 ? `lucro menos ${brl(t.custoVar, true)} de custo de produto` : "sem custo de produto lançado"],
+    ["Investido por dia", t.dias ? brl(t.inv / t.dias, true) : "—", `média em ${t.dias} ${t.dias === 1 ? "dia" : "dias"}`],
+    ["Melhor dia", best ? brl(best.lucro) : "—", best ? `${longDate(best.data)} · ROI ${pct(best.roi)}` : "—"],
+    ["Pior dia", worst ? brl(worst.lucro) : "—", worst ? `${longDate(worst.data)} · ROI ${pct(worst.roi)}` : "—"]
+  ];
+  $("#econ").innerHTML = cells.map(([l, v, s]) =>
+    `<div class="econ__cell"><dt>${esc(l)}</dt><dd>${esc(v)}</dd><small>${esc(s)}</small></div>`).join("");
+}
+
+const CAMPAIGN_LABELS = { criativo: "Criativo", oferta: "Oferta", publico: "Público" };
+
+/** Agrupa os dias com lançamento (ignora dias preenchidos de zero) pelo
+ *  campo estruturado escolhido; dias sem esse campo caem em "Sem categoria". */
+function groupSeries(series, field) {
+  const map = new Map();
+  series.forEach(r => {
+    if (r.filled) return;
+    const src = state.rows.get(r.data);
+    const raw = src && src[field] ? String(src[field]).trim() : "";
+    const key = raw || "Sem categoria";
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(r);
+  });
+  return [...map.entries()]
+    .map(([key, rows]) => ({ key, rows, dias: rows.length, t: totals(rows) }))
+    .sort((a, b) => b.t.lucro - a.t.lucro);
+}
+
+function renderCampaigns(series) {
+  const host = $("#campaigns-body");
+  const groups = groupSeries(series, state.campaignGroup);
+  const label = CAMPAIGN_LABELS[state.campaignGroup];
+
+  if (!groups.length) {
+    host.innerHTML = `<div class="empty-plot" style="height:auto;padding:30px 20px;">Nenhum lançamento do período tem “${esc(label)}” preenchido.</div>`;
+    return;
+  }
+
+  host.innerHTML = `<div class="tablewrap">
+    <table>
+      <caption>Totais por ${esc(label.toLowerCase())}, somando os dias do período selecionado acima</caption>
+      <thead><tr>
+        <th scope="col">${esc(label)}</th><th scope="col">Dias</th><th scope="col">Investido</th>
+        <th scope="col">Recebido</th><th scope="col">Lucro</th><th scope="col">ROI</th>
+      </tr></thead>
+      <tbody>${groups.map(g => `<tr>
+        <td>${esc(g.key)}</td>
+        <td>${g.dias}</td>
+        <td>${esc(brl(g.t.inv, true))}</td>
+        <td>${esc(brl(g.t.receita, true))}</td>
+        <td class="${g.t.lucro >= 0 ? "num--pos" : "num--neg"}">${esc(brl(g.t.lucro, true))}</td>
+        <td class="${g.t.roi === null ? "" : g.t.roi >= 0 ? "num--pos" : "num--neg"}">${esc(pct(g.t.roi))}</td>
+      </tr>`).join("")}</tbody>
+    </table>
+  </div>`;
+}
+
+function renderLedger() {
+  const rows = sortedRows().reverse();
+  const host = $("#ledger-body");
+  const count = $("#rows-count");
+  const demos = [...state.rows.values()].filter(r => r.demo).map(r => r.data);
+  $("#demo-clear-btn").hidden = demos.length === 0;
+
+  if (!rows.length) {
+    host.innerHTML = `
+      <div class="empty">
+        <p><strong>Nenhum dia lançado ainda.</strong> Todo dia você registra quanto gastou em ADS, quanto entrou e quantas vendas fechou — o painel calcula ROI, ritmo e projeção sozinho.</p>
+        <div class="empty__actions">
+          <button type="button" class="btn btn--primary" id="focus-form">Lançar o primeiro dia</button>
+          <button type="button" class="btn btn--ghost" id="demo-btn">Ver com 14 dias de exemplo</button>
+        </div>
+      </div>`;
+    count.textContent = "Nenhum lançamento";
+    $("#focus-form").addEventListener("click", () => $("#f-date").focus());
+    $("#demo-btn").addEventListener("click", seedDemo);
+    return;
+  }
+
+  host.innerHTML = `
+    <div class="tablewrap">
+      <table>
+        <caption>Lançamentos diários — a fonte de todos os números acima</caption>
+        <thead><tr>
+          <th scope="col">Data</th><th scope="col">Gasto ADS</th><th scope="col">Outros</th>
+          <th scope="col">Recebido</th><th scope="col">Vendas</th><th scope="col">Lucro</th>
+          <th scope="col">ROI</th><th scope="col">Ações</th>
+        </tr></thead>
+        <tbody>${rows.map(raw => {
+          const r = normalize(raw);
+          return `<tr>
+            <td>${esc(longDate(r.data))}${r.demo ? '<span class="demotag">exemplo</span>' : ""}${[r.criativo, r.oferta, r.publico].filter(Boolean).length ? `<span class="rownote">${esc([r.criativo, r.oferta, r.publico].filter(Boolean).join(" · "))}</span>` : ""}${r.nota ? `<span class="rownote">${esc(r.nota)}</span>` : ""}</td>
+            <td>${esc(brl(r.ads || 0, true))}</td>
+            <td>${esc(brl(r.extra || 0, true))}</td>
+            <td>${esc(brl(r.receita || 0, true))}</td>
+            <td>${esc(String(r.vendas || 0))}</td>
+            <td class="${r.lucro >= 0 ? "num--pos" : "num--neg"}">${esc(brl(r.lucro, true))}</td>
+            <td class="${r.roi === null ? "" : r.roi >= 0 ? "num--pos" : "num--neg"}">${esc(pct(r.roi))}</td>
+            <td>
+              <button type="button" class="rowbtn" data-edit="${esc(r.data)}">Editar</button>
+              <button type="button" class="rowbtn rowbtn--del" data-del="${esc(r.data)}">Excluir</button>
+            </td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table>
+    </div>`;
+  count.textContent = `${rows.length} ${rows.length === 1 ? "lançamento" : "lançamentos"} · ${longDate(rows[rows.length - 1].data)} → ${longDate(rows[0].data)}`;
+
+  host.querySelectorAll("[data-edit]").forEach(b =>
+    b.addEventListener("click", () => startEdit(b.dataset.edit)));
+  host.querySelectorAll("[data-del]").forEach(b =>
+    b.addEventListener("click", () => {
+      const d = b.dataset.del;
+      if (confirm(`Excluir o lançamento de ${longDate(d)}?`)) {
+        store.remove(d);
+        toast(`Lançamento de ${shortDate(d)} excluído.`);
+      }
+    }));
+}
+
+/* ═══ Formulário ═══════════════════════════════════════════════════ */
+function startEdit(date) {
+  const r = state.rows.get(date);
+  if (!r) return;
+  state.editing = date;
+  $("#f-date").value = r.data;
+  $("#f-ads").value = r.ads ? String(r.ads).replace(".", ",") : "";
+  $("#f-extra").value = r.extra ? String(r.extra).replace(".", ",") : "";
+  $("#f-cost").value = r.custo ? String(r.custo).replace(".", ",") : "";
+  $("#f-rev").value = r.receita ? String(r.receita).replace(".", ",") : "";
+  $("#f-sales").value = r.vendas ? String(r.vendas) : "";
+  $("#f-criativo").value = r.criativo || "";
+  $("#f-oferta").value = r.oferta || "";
+  $("#f-publico").value = r.publico || "";
+  $("#f-note").value = r.nota || "";
+  $("#save-btn").textContent = "Atualizar dia";
+  $("#cancel-btn").hidden = false;
+  $("#ledger").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+  $("#f-ads").focus();
+}
+
+function resetForm() {
+  state.editing = null;
+  $("#entry-form").reset();
+  $("#f-date").value = todayISO();
+  $("#save-btn").textContent = "Salvar dia";
+  $("#cancel-btn").hidden = true;
+}
+
+$("#entry-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const date = $("#f-date").value;
+  if (!date) { toast("Escolha a data do lançamento.", "bad"); $("#f-date").focus(); return; }
+  const row = {
+    data: date,
+    ads: Math.max(0, parseNum($("#f-ads").value)),
+    extra: Math.max(0, parseNum($("#f-extra").value)),
+    custo: Math.max(0, parseNum($("#f-cost").value)),
+    receita: Math.max(0, parseNum($("#f-rev").value)),
+    vendas: Math.max(0, Math.round(parseNum($("#f-sales").value))),
+    criativo: $("#f-criativo").value.trim().slice(0, 40),
+    oferta: $("#f-oferta").value.trim().slice(0, 40),
+    publico: $("#f-publico").value.trim().slice(0, 40),
+    nota: $("#f-note").value.trim().slice(0, 90),
+    demo: false // lançamento editado/manual nunca fica marcado como exemplo
+  };
+  if (!row.ads && !row.extra && !row.receita && !row.vendas) {
+    toast("Preencha ao menos um valor do dia.", "bad"); $("#f-ads").focus(); return;
+  }
+  const existed = state.rows.has(date) && state.editing !== date;
+  store.save(row);
+  toast(existed ? `${shortDate(date)} já existia e foi atualizado.` : state.editing ? `${shortDate(date)} atualizado.` : `${shortDate(date)} salvo.`, "good");
+  resetForm();
+});
+$("#cancel-btn").addEventListener("click", resetForm);
+
+/* ═══ Controles ════════════════════════════════════════════════════ */
+$("#range-seg").addEventListener("click", e => {
+  const b = e.target.closest("[data-range]");
+  if (!b) return;
+  const val = b.dataset.range;
+  state.range = (val === "all" || val === "week") ? val : Number(val);
+  if (val === "week") state.weekOffset = 0;
+  $("#week-nav").hidden = val !== "week";
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  render();
+});
+$("#week-prev").addEventListener("click", () => { state.weekOffset -= 1; render(); });
+$("#week-next").addEventListener("click", () => {
+  if (state.weekOffset >= 0) return;
+  state.weekOffset += 1;
+  render();
+});
+$("#campaign-seg").addEventListener("click", e => {
+  const b = e.target.closest("[data-group]");
+  if (!b) return;
+  state.campaignGroup = b.dataset.group;
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderCampaigns(lastSeries);
+});
+$("#pace-seg").addEventListener("click", e => {
+  const b = e.target.closest("[data-pace]");
+  if (!b) return;
+  state.pace = Number(b.dataset.pace);
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  render();
+});
+document.querySelectorAll("[data-goto]").forEach(b =>
+  b.addEventListener("click", () => $("#" + b.dataset.goto).scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" })));
+
+$("#quick-add").addEventListener("click", () => {
+  resetForm();
+  $("#ledger").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+  setTimeout(() => $("#f-ads").focus(), REDUCED ? 0 : 420);
+});
+document.querySelectorAll(".datechips button").forEach(b =>
+  b.addEventListener("click", () => { $("#f-date").value = iso(addDays(new Date(), Number(b.dataset.day))); }));
+
+const metaInput = $("#meta-input");
+let metaTimer = null;
+metaInput.addEventListener("input", () => {
+  const v = Math.max(0, parseNum(metaInput.value));
+  state.meta = v;
+  renderMeter(paceModel()?.p30.lucro ?? 0);
+  clearTimeout(metaTimer);
+  metaTimer = setTimeout(() => store.saveMeta(v), 600);
+});
+
+/* ═══ Exemplo e exportação ═════════════════════════════════════════ */
+function seedDemo() {
+  const base = parseISO(todayISO());
+  const V = "Vídeo depoimento", C = "Carrossel antes/depois", R = "Reels bastidor";
+  const L = "Combo lançamento", O = "Oferta relâmpago";
+  const M = "Mulheres 25-45", E = "Interessadas em emagrecimento";
+  const shape = [
+    [80, 0, 0, 0, 0, "", "", ""],
+    [120, 0, 197, 1, 25, V, L, M], [150, 10, 340, 2, 25, V, L, M],
+    [140, 0, 120, 1, 25, C, L, M], [190, 0, 590, 3, 25, C, O, E],
+    [210, 15, 780, 4, 25, R, O, E], [180, 0, 260, 1, 25, R, O, E],
+    [230, 0, 940, 5, 25, V, L, M], [260, 20, 1180, 6, 25, V, L, M],
+    [240, 0, 700, 4, 25, C, O, E], [200, 0, 0, 0, 0, "", "", ""],
+    [290, 25, 1420, 7, 25, R, O, E], [310, 0, 1610, 8, 25, V, L, M],
+    [280, 0, 1090, 6, 25, C, L, M]
+  ];
+  const rows = shape.map((s, i) => ({
+    data: iso(addDays(base, -(shape.length - 1 - i))),
+    ads: s[0], extra: s[1], receita: s[2], vendas: s[3], custo: s[4],
+    criativo: s[5], oferta: s[6], publico: s[7], nota: "", demo: true
+  }));
+  store.saveMany(rows);
+  toast("14 dias de exemplo carregados. Use “Remover exemplos” quando quiser limpar.", "good");
+}
+$("#demo-clear-btn").addEventListener("click", () => {
+  const demos = [...state.rows.values()].filter(r => r.demo).map(r => r.data);
+  if (!demos.length) return;
+  if (!confirm(`Remover ${demos.length} lançamentos de exemplo? Seus lançamentos reais ficam.`)) return;
+  store.removeMany(demos);
+  toast("Exemplos removidos.");
+});
+
+let downloads = null;
+
+function buildCsv() {
+  const rows = sortedRows().map(normalize);
+  const head = "data;gasto_ads;outros_custos;investimento;custo_produto_unitario;custo_produto_total;valor_recebido;vendas;lucro;roi;margem_contribuicao;criativo;oferta;publico;observacao";
+  const body = rows.map(r => [
+    r.data, (r.ads || 0).toFixed(2), (r.extra || 0).toFixed(2), r.inv.toFixed(2),
+    (r.custo || 0).toFixed(2), r.custoVar.toFixed(2),
+    (r.receita || 0).toFixed(2), r.vendas || 0, r.lucro.toFixed(2),
+    r.roi === null ? "" : (r.roi * 100).toFixed(1), r.margemContrib.toFixed(2),
+    String(r.criativo || "").replace(/[;\n]/g, " "),
+    String(r.oferta || "").replace(/[;\n]/g, " "),
+    String(r.publico || "").replace(/[;\n]/g, " "),
+    String(r.nota || "").replace(/[;\n]/g, " ")
+  ].join(";")).join("\n");
+  return "﻿" + head + "\n" + body;   // BOM para o Excel abrir em UTF-8
+}
+
+/** Divide uma linha respeitando aspas — o Excel pode envolver campos em
+ *  aspas ao reabrir/ressalvar um CSV; "" dentro de aspas vira uma aspa. */
+function splitCsvLine(line, delim = ";") {
+  const out = [];
+  let cur = "", inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else inQuotes = false; }
+      else cur += c;
+    } else if (c === '"') inQuotes = true;
+    else if (c === delim) { out.push(cur); cur = ""; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
+/** Aceita a data como o export grava (ISO) e também DD/MM/AAAA, caso o
+ *  Excel reformate a coluna ao salvar de novo. */
+function parseCsvDate(s) {
+  s = String(s ?? "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const br = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return br ? `${br[3]}-${br[2]}-${br[1]}` : null;
+}
+
+/* Só os campos que o usuário digita — colunas derivadas (investimento,
+   custo_produto_total, lucro, roi, margem_contribuicao) são ignoradas na
+   importação e recalculadas por normalize(), igual a qualquer lançamento
+   manual. Procura pelo NOME da coluna, não pela posição, para tolerar um
+   CSV reordenado ou com colunas extras. */
+const CSV_IMPORT_COLUMNS = {
+  ads: "gasto_ads", extra: "outros_custos", custo: "custo_produto_unitario",
+  receita: "valor_recebido", vendas: "vendas",
+  criativo: "criativo", oferta: "oferta", publico: "publico", nota: "observacao"
+};
+
+function parseCsv(text) {
+  const lines = text.replace(/^﻿/, "").split(/\r\n|\n|\r/).filter(l => l.trim() !== "");
+  if (!lines.length) return { rows: [], invalid: 0, noHeader: true };
+  const header = splitCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+  const dataIdx = header.indexOf("data");
+  if (dataIdx === -1) return { rows: [], invalid: lines.length - 1, noHeader: true };
+  const idx = {};
+  Object.entries(CSV_IMPORT_COLUMNS).forEach(([key, col]) => { idx[key] = header.indexOf(col); });
+
+  const rows = [];
+  let invalid = 0;
+  for (let i = 1; i < lines.length; i++) {
+    const cells = splitCsvLine(lines[i]);
+    const date = parseCsvDate(cells[dataIdx]);
+    if (!date) { invalid++; continue; }
+    const get = key => (idx[key] >= 0 && cells[idx[key]] !== undefined) ? cells[idx[key]] : "";
+    rows.push({
+      data: date,
+      ads: Math.max(0, parseNum(get("ads"))),
+      extra: Math.max(0, parseNum(get("extra"))),
+      custo: Math.max(0, parseNum(get("custo"))),
+      receita: Math.max(0, parseNum(get("receita"))),
+      vendas: Math.max(0, Math.round(parseNum(get("vendas")))),
+      criativo: get("criativo").trim().slice(0, 40),
+      oferta: get("oferta").trim().slice(0, 40),
+      publico: get("publico").trim().slice(0, 40),
+      nota: get("nota").trim().slice(0, 90),
+      demo: false // linha importada nunca fica marcada como exemplo
+    });
+  }
+  return { rows, invalid };
+}
+
+$("#csv-import-btn").addEventListener("click", () => $("#csv-input").click());
+$("#csv-input").addEventListener("change", () => {
+  const file = $("#csv-input").files[0];
+  $("#csv-input").value = "";   // permite reimportar o mesmo arquivo depois
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try { parsed = parseCsv(String(reader.result)); }
+    catch { toast("Não foi possível ler esse CSV.", "bad"); return; }
+    if (parsed.noHeader) { toast("Cabeçalho do CSV não reconhecido — falta a coluna “data”.", "bad"); return; }
+    if (!parsed.rows.length) { toast("Nenhuma linha válida encontrada no arquivo.", "bad"); return; }
+
+    const existed = parsed.rows.filter(r => state.rows.has(r.data)).length;
+    const novos = parsed.rows.length - existed;
+    store.saveMany(parsed.rows);
+
+    const parts = [];
+    if (novos) parts.push(`${novos} ${novos === 1 ? "novo" : "novos"}`);
+    if (existed) parts.push(`${existed} ${existed === 1 ? "atualizado" : "atualizados"}`);
+    let msg = `${parsed.rows.length} ${parsed.rows.length === 1 ? "lançamento importado" : "lançamentos importados"} (${parts.join(", ")}).`;
+    if (parsed.invalid) msg += ` ${parsed.invalid} ${parsed.invalid === 1 ? "linha ignorada" : "linhas ignoradas"} (data inválida).`;
+    toast(msg, "good");
+  };
+  reader.onerror = () => toast("Não foi possível ler esse arquivo.", "bad");
+  reader.readAsText(file, "utf-8");
+});
+
+$("#csv-btn").addEventListener("click", async () => {
+  if (!state.rows.size) { toast("Nada para exportar ainda.", "bad"); return; }
+  const filename = `caixa-x1-${todayISO()}.csv`;
+  const csv = buildCsv();
+
+  if (downloads) {
+    try { await downloads.save({ filename, data: csv }); }
+    catch (e) { if (e && e.code !== "cancelled") toast("Não foi possível gerar o CSV.", "bad"); }
+    return;
+  }
+  if (!STANDALONE) return;
+  try {
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast("CSV salvo.", "good");
+  } catch { toast("Não foi possível gerar o CSV.", "bad"); }
+});
+
+/* ═══ Início ═══════════════════════════════════════════════════════ */
+function hydrate(rows) {
+  state.rows = new Map(rows.filter(r => r && r.data).map(r => [r.data, r]));
+}
+
+hydrate(store.readLocal());
+state.meta = Math.max(0, Number(store.readLocalCfg().meta) || 0);
+if (state.meta > 0) metaInput.value = String(state.meta).replace(".", ",");
+resetForm();
+markSource();
+render();
+
+document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const range = windowRange();
+    const series = range ? buildSeries(range.from, range.to) : [];
+    renderCharts(series, paceModel());
+  }, 140);
+});
+
+if (STANDALONE) $("#csv-btn").hidden = false;
+
+(async () => {
+  if (!sb) { markSource(); return; }
+
+  try {
+    const { data: cfgRow, error } = await sb.from("config").select("meta").eq("id", true).maybeSingle();
+    if (!error && cfgRow) {
+      const m = Math.max(0, Number(cfgRow.meta) || 0);
+      if (m !== state.meta) {
+        state.meta = m;
+        metaInput.value = m > 0 ? String(m).replace(".", ",") : "";
+      }
+    } else if (!error && state.meta > 0) {
+      await sb.from("config").upsert({ id: true, meta: state.meta });
+    }
+  } catch (e) { /* a meta local continua valendo */ }
+
+  let migrated = false;
+  async function pullAndRender() {
+    const { data, error } = await sb.from("dias").select("*").order("data", { ascending: true });
+    if (error) { dbError(error, "carregar os lançamentos"); return; }
+
+    if (!migrated && !data.length && state.rows.size) {
+      migrated = true;
+      const local = [...state.rows.values()];
+      try {
+        const { error: upErr } = await sb.from("dias").upsert(local, { onConflict: "data" });
+        if (upErr) throw upErr;
+        toast(`${local.length} ${local.length === 1 ? "lançamento" : "lançamentos"} deste navegador enviados para a nuvem.`, "good");
+      } catch (e) { dbError(e, "enviar os lançamentos para a nuvem"); return; }
+    }
+    migrated = true;
+    hydrate(data);
+    store.writeLocal();
+    render();
+  }
+
+  await pullAndRender();
+  cloudOK = true;
+  markSource();
+
+  /* Realtime: qualquer mudança na tabela (por este ou outro aparelho)
+     recarrega a lista, mantendo os dispositivos sincronizados. */
+  sb.channel("dias-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "dias" }, () => { pullAndRender(); })
+    .subscribe();
+})();
+</script>
+
+
+</body>
+</html>
